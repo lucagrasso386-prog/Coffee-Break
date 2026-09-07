@@ -131,12 +131,16 @@ flag it if the creator intended the opposite.
   no clean color boundary between them (verified: no distance-from-background
   threshold, at any value, cleanly separates the two, since the shadow's
   density right at the contact point matches or exceeds the brightness of
-  real object surface elsewhere). The fix doesn't try to threshold that
-  region at all: it keeps the reliable, shadow-free upper ~70% of the
-  silhouette as-is, and completes the base by tapering that shape downward
-  rather than reading pixel data from the ambiguous zone. The result is a
-  clean, shadow-free cutout, though the very base is a plausible
-  reconstruction rather than a pixel-exact trace of the original photo.
+  real object surface elsewhere). A first attempt worked around this by
+  tapering the reliable upper silhouette down to close off the base without
+  reading the ambiguous pixels at all — technically shadow-free, but the
+  fabricated base didn't match the real photo and looked wrong. Fixed
+  properly using a different, real signal instead of color: the cream's
+  surface has visible fold/crease texture (local pixel variance) even where
+  pale, while the shadow is a smooth, textureless gradient. Tracing the
+  lowest row of genuine texture in each column recovers the object's actual
+  scalloped base contour from the real image data, rather than inventing
+  it — the current cutout is a true trace, not a reconstruction.
 
 Feature screens aren't built yet — those start with `08-page-accueil.md`
 onward, per the numbered spec order. Boost powers (`06-pouvoirs-des-bonus.md`)
