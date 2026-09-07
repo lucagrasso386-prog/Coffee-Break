@@ -116,6 +116,28 @@ vertical-stripes→column-clear and horizontal-stripes→row-clear per the
 common match-3 convention (matching this to the sprite most people expect);
 flag it if the creator intended the opposite.
 
+**Two corrections from the first pass, per creator review:**
+
+- **Vitrine en verre**: the source photo shows a donut placed inside the
+  glass case as an *example* of "an element enclosed in glass" — it's not
+  meant to be baked into the obstacle asset itself, since in-game any
+  element can be the one trapped inside. `obstacle-vitrine-verre.png` now
+  contains only the glass frame, with the donut's silhouette (and a
+  generous margin around it) cut out to full transparency, so it can be
+  composited over whichever element the level places underneath.
+- **Chantilly**: the source photo's soft drop shadow was being kept as if
+  it were part of the object. This one was genuinely hard — the shadow
+  blends continuously into the cream's own ambient-occlusion shading with
+  no clean color boundary between them (verified: no distance-from-background
+  threshold, at any value, cleanly separates the two, since the shadow's
+  density right at the contact point matches or exceeds the brightness of
+  real object surface elsewhere). The fix doesn't try to threshold that
+  region at all: it keeps the reliable, shadow-free upper ~70% of the
+  silhouette as-is, and completes the base by tapering that shape downward
+  rather than reading pixel data from the ambiguous zone. The result is a
+  clean, shadow-free cutout, though the very base is a plausible
+  reconstruction rather than a pixel-exact trace of the original photo.
+
 Feature screens aren't built yet — those start with `08-page-accueil.md`
 onward, per the numbered spec order. Boost powers (`06-pouvoirs-des-bonus.md`)
 aren't implemented yet either.
