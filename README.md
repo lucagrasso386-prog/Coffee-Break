@@ -14,6 +14,7 @@ processed in order.
 ios/       — SwiftUI/SceneKit app (see ios/README.md)
 backend/   — Express/Prisma API, deployed on Railway (see backend/README.md)
 docs/      — setup checklist + privacy policy template
+images/    — unmodified final assets provided by the creator, spec by spec
 ```
 
 ## Status
@@ -22,4 +23,6 @@ docs/      — setup checklist + privacy policy template
       structure, backend API skeleton, iOS app skeleton). Manual account
       setup (Apple Developer, Railway, App Store Connect) is tracked in
       `docs/SETUP.md` — nothing there can be done from a coding session.
-- [ ] `02-identite-visuelle.md` onward — not started yet.
+- [x] `02-identite-visuelle.md` — name "Coffee Break", app icon, and logo
+      wired into the iOS project (see `ios/README.md` for details).
+- [ ] `03-assets-de-jeu.md` onward — not started yet.
