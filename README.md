@@ -34,4 +34,9 @@ images/    — unmodified final assets provided by the creator, spec by spec
       client-side mirror for display (`ios/CoffeeBreak/Models/Lives.swift`,
       `XPReward.swift`). Not yet wired to any UI trigger — that's later
       files (`05`, `11`, `12`).
-- [ ] `05-mecaniques-de-jeu.md` onward — not started yet.
+- [x] `05-mecaniques-de-jeu.md` — special pieces, obstacles, and delivery
+      objective assets wired in, plus static data models for each (see
+      `ios/README.md` for details, including one naming assumption flagged
+      for the creator to confirm). Board generation and the match-3 engine
+      itself are deferred to `09`/`10`/`11`.
+- [ ] `06-pouvoirs-des-bonus.md` onward — not started yet.

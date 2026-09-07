@@ -84,7 +84,38 @@ to replace the initial extraction from the original draft sheets
 `/images` for reference). Each item was cropped and isolated from the pink
 background; pixel content of every item was left untouched.
 
+## Match-3 mechanics assets and data (`05-mecaniques-de-jeu.md`)
+
+- `Resources/Assets.xcassets/SpecialPieces/` — the 3 special pieces
+  (tourbillon, bombe aux éclats, and rayée split into its two stripe
+  orientations as separate sprites: `special-rayee-verticale` /
+  `-horizontale`).
+- `Resources/Assets.xcassets/Obstacles/` — the 4 difficulty obstacles:
+  vitrine en verre, caramel (2 hit states), cookie aux pépites (4 hit
+  states), macaron.
+- `Resources/Assets.xcassets/DeliveryObjectives/` — the 2 "livraison"
+  objective objects (chantilly, sac de café).
+- `CoffeeBreak/Models/SpecialPiece.swift`, `Obstacle.swift`,
+  `DeliveryObjective.swift` — static data only (asset names, hit counts,
+  unlock levels, creation/effect descriptions as text). No match-3 board
+  engine exists yet to actually detect alignments or apply these effects —
+  that's `11-ecran-de-jeu.md`.
+- **Not modeled yet, deferred to later spec files**: the actual board/grid
+  engine and match detection; level generation (board size/shape
+  progression from 7x7 up to 10x50 around level 1000, mandatory shape
+  variety and mission-type alternation between consecutive levels, the
+  environment theme changing every 10 levels, pre-loading the first 1000
+  levels) — this depends on `09-carte-progression.md`,
+  `10-fiche-mission-niveau.md`, and `11-ecran-de-jeu.md`, none of which
+  exist yet.
+
+**Note on rayée's orientation-to-effect mapping**: the spec doesn't say
+which stripe orientation clears a row vs. a column, only that a horizontal
+or vertical 4-match creates the piece. `SpecialPiece.swift` assigns
+vertical-stripes→column-clear and horizontal-stripes→row-clear per the
+common match-3 convention (matching this to the sprite most people expect);
+flag it if the creator intended the opposite.
+
 Feature screens aren't built yet — those start with `08-page-accueil.md`
-onward, per the numbered spec order. Match-3 mechanics (`05-mecaniques-de-jeu.md`)
-and boost powers (`06-pouvoirs-des-bonus.md`) aren't implemented yet either
-— only the visual assets and naming are in place so far.
+onward, per the numbered spec order. Boost powers (`06-pouvoirs-des-bonus.md`)
+aren't implemented yet either.
