@@ -25,4 +25,7 @@ images/    — unmodified final assets provided by the creator, spec by spec
       `docs/SETUP.md` — nothing there can be done from a coding session.
 - [x] `02-identite-visuelle.md` — name "Coffee Break", app icon, and logo
       wired into the iOS project (see `ios/README.md` for details).
-- [ ] `03-assets-de-jeu.md` onward — not started yet.
+- [x] `03-assets-de-jeu.md` — the 6 matchable elements, 5 boosts, and coin
+      currency wired into the iOS project (see `ios/README.md` for details
+      on how the two draft sheets were sliced into individual sprites).
+- [ ] `04-systemes-progression-et-xp.md` onward — not started yet.

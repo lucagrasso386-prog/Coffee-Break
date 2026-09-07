@@ -61,5 +61,31 @@ CoffeeBreak/
 Original, untouched source images for every spec file are mirrored under
 `/images` at the repo root.
 
+## Game assets (`03-assets-de-jeu.md`)
+
+- `Resources/Assets.xcassets/GameElements/` — the 6 matchable elements
+  (cupcake, donut, tartelette, croissant, part de gâteau, bretzel), each
+  isolated on a transparent background.
+- `Resources/Assets.xcassets/Boosts/` — the 5 boost visuals (café latte,
+  café à emporter, matcha latte, canette de soda, jus d'orange), also
+  isolated with transparent backgrounds.
+- `Resources/Assets.xcassets/Currency/coin-cafe.imageset/` — the coin,
+  embedded exactly as provided (the only one of the three source images
+  marked `VALIDEE` rather than `brouillon`, so it wasn't touched).
+- `CoffeeBreak/Models/GameElement.swift`, `Boost.swift`, `Currency.swift` —
+  enums mapping each asset to its imageset name, for later screens/mechanics
+  to reference.
+
+**Note on the source files**: `elements-a-matcher-brouillon.jpeg` and
+`boosts-brouillon.jpeg` were draft reference sheets — 6 (resp. 5) items
+laid out on one canvas with a design-tool dotted background, not individual
+game-ready sprites like the coin. Per the creator, they were treated as
+final and programmatically sliced into one transparent PNG per item (pixel
+content of each item left untouched — only cropped and isolated from the
+dotted backdrop). If a future spec file ships proper individually-exported
+versions of these, swap them in.
+
 Feature screens aren't built yet — those start with `08-page-accueil.md`
-onward, per the numbered spec order.
+onward, per the numbered spec order. Match-3 mechanics (`05-mecaniques-de-jeu.md`)
+and boost powers (`06-pouvoirs-des-bonus.md`) aren't implemented yet either
+— only the visual assets and naming are in place so far.
