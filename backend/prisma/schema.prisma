@@ -1,0 +1,52 @@
+// Coffee Break backend schema.
+// Covers what 01-setup-projet-et-architecture.md specifies: accounts (Apple or
+// device-local), progression sync (unlocked levels, XP, currency), and IAP
+// receipt validation records. Expect this to grow once 04-systemes-progression-et-xp.md
+// and 05-mecaniques-de-jeu.md are processed (e.g. lives, per-level star state).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  // Set once the player uses Sign in with Apple.
+  appleUserId String?  @unique
+  // Set for installs that never connect an account (device-local save).
+  deviceId    String?  @unique
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  progress  Progress?
+  purchases Purchase[]
+}
+
+model Progress {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  unlockedLevel Int @default(1)
+  xp            Int @default(0)
+  coins         Int @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+model Purchase {
+  id                     String   @id @default(cuid())
+  userId                 String
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId              String
+  transactionId          String   @unique
+  originalTransactionId  String?
+  environment            String // "Sandbox" | "Production"
+  purchaseType           String // "consumable" | "subscription"
+  validatedAt            DateTime @default(now())
+}

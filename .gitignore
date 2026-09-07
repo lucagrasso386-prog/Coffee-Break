@@ -60,3 +60,15 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# XcodeGen: the .xcodeproj is generated from ios/project.yml, don't commit it
+ios/*.xcodeproj
+ios/.swiftpm/
+
+# Backend (Node/TypeScript)
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/*.log
+backend/prisma/*.db
+
