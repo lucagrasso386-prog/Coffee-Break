@@ -76,14 +76,13 @@ Original, untouched source images for every spec file are mirrored under
   enums mapping each asset to its imageset name, for later screens/mechanics
   to reference.
 
-**Note on the source files**: `elements-a-matcher-brouillon.jpeg` and
-`boosts-brouillon.jpeg` were draft reference sheets — 6 (resp. 5) items
-laid out on one canvas with a design-tool dotted background, not individual
-game-ready sprites like the coin. Per the creator, they were treated as
-final and programmatically sliced into one transparent PNG per item (pixel
-content of each item left untouched — only cropped and isolated from the
-dotted backdrop). If a future spec file ships proper individually-exported
-versions of these, swap them in.
+**Note on the source files**: the current sprites are extracted from
+`images/elements-final.jpg` and `images/boosts-final.jpg` — final composite
+images (6, resp. 5, items on a solid pink backdrop) provided by the creator
+to replace the initial extraction from the original draft sheets
+(`elements-a-matcher-brouillon.jpeg`, `boosts-brouillon.jpeg`, still kept in
+`/images` for reference). Each item was cropped and isolated from the pink
+background; pixel content of every item was left untouched.
 
 Feature screens aren't built yet — those start with `08-page-accueil.md`
 onward, per the numbered spec order. Match-3 mechanics (`05-mecaniques-de-jeu.md`)
