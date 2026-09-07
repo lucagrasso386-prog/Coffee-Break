@@ -1,8 +1,8 @@
 // Coffee Break backend schema.
-// Covers what 01-setup-projet-et-architecture.md specifies: accounts (Apple or
-// device-local), progression sync (unlocked levels, XP, currency), and IAP
-// receipt validation records. Expect this to grow once 04-systemes-progression-et-xp.md
-// and 05-mecaniques-de-jeu.md are processed (e.g. lives, per-level star state).
+// Covers 01-setup-projet-et-architecture.md (accounts, progression sync, IAP
+// receipt validation) and 04-systemes-progression-et-xp.md (lives, XP).
+// Expect this to grow further once 05-mecaniques-de-jeu.md is processed
+// (e.g. per-level star state).
 
 generator client {
   provider = "prisma-client-js"
@@ -36,17 +36,23 @@ model Progress {
   xp            Int @default(0)
   coins         Int @default(0)
 
+  // 04-systemes-progression-et-xp.md: 10 max, +1/hour. livesUpdatedAt anchors
+  // the regen calculation (see src/lib/lives.ts) rather than storing a raw
+  // timestamp per life, so partial progress toward the next life isn't lost.
+  lives          Int      @default(10)
+  livesUpdatedAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 }
 
 model Purchase {
-  id                     String   @id @default(cuid())
-  userId                 String
-  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productId              String
-  transactionId          String   @unique
-  originalTransactionId  String?
-  environment            String // "Sandbox" | "Production"
-  purchaseType           String // "consumable" | "subscription"
-  validatedAt            DateTime @default(now())
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId             String
+  transactionId         String   @unique
+  originalTransactionId String?
+  environment           String // "Sandbox" | "Production"
+  purchaseType          String // "consumable" | "subscription"
+  validatedAt           DateTime @default(now())
 }

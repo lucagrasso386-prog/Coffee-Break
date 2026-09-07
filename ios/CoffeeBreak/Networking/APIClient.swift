@@ -4,6 +4,8 @@ struct ProgressDTO: Codable {
     let unlockedLevel: Int
     let xp: Int
     let coins: Int
+    let lives: Int
+    let livesUpdatedAt: Date
 }
 
 struct AuthResponse: Codable {
@@ -59,7 +61,26 @@ final class APIClient {
         return wrapper.progress
     }
 
+    /// Reports a finished level so the server can apply the XP reward
+    /// (04-systemes-progression-et-xp.md). Not called from any screen yet.
+    func completeLevel(stars: Int, movesRemaining: Int) async throws -> (progress: ProgressDTO, xpGained: Int) {
+        struct Body: Encodable { let stars: Int; let movesRemaining: Int }
+        struct Wrapper: Decodable { let progress: ProgressDTO; let xpGained: Int }
+        let wrapper: Wrapper = try await post("/progress/complete-level", body: Body(stars: stars, movesRemaining: movesRemaining))
+        return (wrapper.progress, wrapper.xpGained)
+    }
+
+    /// Spends one life. Not called from any screen yet -- the trigger
+    /// (level start vs. loss) isn't defined until later spec files.
+    func consumeLife() async throws -> ProgressDTO {
+        struct Wrapper: Decodable { let progress: ProgressDTO }
+        let wrapper: Wrapper = try await post("/progress/consume-life", body: Empty())
+        return wrapper.progress
+    }
+
     // MARK: - Low-level helpers
+
+    private struct Empty: Encodable {}
 
     private func get<Response: Decodable>(_ path: String) async throws -> Response {
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
@@ -67,7 +88,7 @@ final class APIClient {
         return try await send(request)
     }
 
-    private func post<Response: Decodable>(_ path: String, body: [String: String]) async throws -> Response {
+    private func post<Body: Encodable, Response: Decodable>(_ path: String, body: Body) async throws -> Response {
         var request = URLRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -88,6 +109,8 @@ final class APIClient {
         guard (200..<300).contains(http.statusCode) else {
             throw APIError.server(status: http.statusCode)
         }
-        return try JSONDecoder().decode(Response.self, from: data)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(Response.self, from: data)
     }
 }

@@ -28,4 +28,10 @@ images/    — unmodified final assets provided by the creator, spec by spec
 - [x] `03-assets-de-jeu.md` — the 6 matchable elements, 5 boosts, and coin
       currency wired into the iOS project (see `ios/README.md` for details
       on how the two draft sheets were sliced into individual sprites).
-- [ ] `04-systemes-progression-et-xp.md` onward — not started yet.
+- [x] `04-systemes-progression-et-xp.md` — lives (10 max, +1/hour) and the
+      level-completion XP formula, implemented server-side as the source of
+      truth (`backend/src/lib/lives.ts`, `backend/src/lib/xp.ts`) with a
+      client-side mirror for display (`ios/CoffeeBreak/Models/Lives.swift`,
+      `XPReward.swift`). Not yet wired to any UI trigger — that's later
+      files (`05`, `11`, `12`).
+- [ ] `05-mecaniques-de-jeu.md` onward — not started yet.
