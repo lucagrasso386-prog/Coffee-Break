@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../db/prisma";
 import { issueSessionToken } from "../middleware/auth";
 import { verifyAppleIdentityToken } from "../lib/appleAuth";
+import { verifyGoogleIdToken } from "../lib/googleAuth";
 
 export const authRouter = Router();
 
@@ -89,6 +90,62 @@ authRouter.post("/apple", async (req, res) => {
 
   const created = await prisma.user.create({
     data: { appleUserId: identity.appleUserId, email: identity.email, progress: { create: {} } },
+    include: { progress: true },
+  });
+  res.json({ userId: created.id, token: issueSessionToken(created.id), progress: created.progress });
+});
+
+const googleAuthSchema = z.object({
+  idToken: z.string().min(1),
+  // Optional: link the currently-signed-in device account to this Google
+  // account instead of creating/loading a fresh Google-linked account.
+  linkDeviceId: z.string().optional(),
+});
+
+/**
+ * Sign in with Google -- the Android-launch counterpart to POST /auth/apple.
+ * Same find-existing / link-device / create-fresh flow, against a Google id
+ * token instead of an Apple identity token.
+ */
+authRouter.post("/google", async (req, res) => {
+  const parsed = googleAuthSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
+    return;
+  }
+
+  const { idToken, linkDeviceId } = parsed.data;
+
+  let identity;
+  try {
+    identity = await verifyGoogleIdToken(idToken);
+  } catch {
+    res.status(401).json({ error: "Invalid Google id token" });
+    return;
+  }
+
+  const existing = await prisma.user.findUnique({
+    where: { googleUserId: identity.googleUserId },
+    include: { progress: true },
+  });
+
+  if (existing) {
+    res.json({ userId: existing.id, token: issueSessionToken(existing.id), progress: existing.progress });
+    return;
+  }
+
+  if (linkDeviceId) {
+    const linked = await prisma.user.update({
+      where: { deviceId: linkDeviceId },
+      data: { googleUserId: identity.googleUserId, email: identity.email },
+      include: { progress: true },
+    });
+    res.json({ userId: linked.id, token: issueSessionToken(linked.id), progress: linked.progress });
+    return;
+  }
+
+  const created = await prisma.user.create({
+    data: { googleUserId: identity.googleUserId, email: identity.email, progress: { create: {} } },
     include: { progress: true },
   });
   res.json({ userId: created.id, token: issueSessionToken(created.id), progress: created.progress });

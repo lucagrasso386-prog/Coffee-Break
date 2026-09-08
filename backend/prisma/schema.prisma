@@ -3,6 +3,10 @@
 // receipt validation) and 04-systemes-progression-et-xp.md (lives, XP).
 // Expect this to grow further once 05-mecaniques-de-jeu.md is processed
 // (e.g. per-level star state).
+//
+// Account model supports two sign-in providers (Apple, Google) plus a
+// device-local fallback, since the client ships on iOS and Android at
+// launch (see mobile/README.md) rather than iOS-only.
 
 generator client {
   provider = "prisma-client-js"
@@ -17,6 +21,9 @@ model User {
   id          String   @id @default(cuid())
   // Set once the player uses Sign in with Apple.
   appleUserId String?  @unique
+  // Set once the player uses Sign in with Google (the Android-launch
+  // counterpart to appleUserId).
+  googleUserId String? @unique
   // Set for installs that never connect an account (device-local save).
   deviceId    String?  @unique
   email       String?

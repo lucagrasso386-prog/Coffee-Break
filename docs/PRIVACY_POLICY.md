@@ -3,8 +3,8 @@
 _Last updated: [DATE]_
 
 > Template — fill in the bracketed placeholders before publishing. This is
-> required in App Store Connect because Coffee Break offers in-app purchases
-> and optional user accounts.
+> required in both App Store Connect and Google Play Console because Coffee
+> Break offers in-app purchases and optional user accounts.
 
 ## Who we are
 
@@ -13,9 +13,9 @@ Coffee Break is developed by [DEVELOPER / COMPANY NAME]. Contact:
 
 ## What we collect
 
-- **Account data**: if you choose to sign in with Sign in with Apple, we
-  store the Apple-provided user identifier and, if shared, your email
-  address, to sync your progress across devices.
+- **Account data**: if you choose to sign in with Sign in with Apple or Sign
+  in with Google, we store the provider's user identifier and, if shared,
+  your email address, to sync your progress across devices.
 - **Local/device play**: if you don't connect an account, your progress is
   tied to a local, device-specific identifier and is not linked to any
   personal information.
@@ -23,7 +23,8 @@ Coffee Break is developed by [DEVELOPER / COMPANY NAME]. Contact:
   balance, so your progress can be restored.
 - **Purchase data**: in-app purchase transaction identifiers, used to
   validate purchases and prevent fraud. We do not receive or store your
-  Apple ID payment details — purchases are processed by Apple.
+  Apple ID or Google Play payment details — purchases are processed by
+  Apple or Google respectively.
 
 ## How we use it
 
@@ -43,12 +44,15 @@ Coffee Break is developed by [DEVELOPER / COMPANY NAME]. Contact:
 ## Third parties
 
 - Apple (Sign in with Apple, StoreKit purchases, TestFlight distribution).
+- Google (Sign in with Google, Google Play Billing purchases, Play Console
+  testing tracks).
 - [Add any analytics/crash-reporting provider here, if one is introduced
   later — none is used at this stage.]
 
 ## Children's privacy
 
-[Fill in based on the app's age rating once set in App Store Connect.]
+[Fill in based on the app's age rating once set in App Store Connect and
+Google Play Console's content rating questionnaire.]
 
 ## Changes to this policy
 

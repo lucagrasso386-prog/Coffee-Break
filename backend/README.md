@@ -1,8 +1,9 @@
 # Coffee Break — Backend
 
-Express + TypeScript + Prisma (Postgres) API for the Coffee Break iOS game:
-accounts (device-local or Sign in with Apple), progression sync (unlocked
-levels, XP, coins), and server-side IAP receipt validation.
+Express + TypeScript + Prisma (Postgres) API for the Coffee Break iOS +
+Android game: accounts (device-local, Sign in with Apple, or Sign in with
+Google), progression sync (unlocked levels, XP, coins), and server-side IAP
+receipt validation.
 
 ## Local development
 
@@ -21,6 +22,8 @@ liveness check.
 - `POST /auth/device` — create/load the device-local account for an install
   without a connected account. Body: `{ deviceId }`.
 - `POST /auth/apple` — Sign in with Apple. Body: `{ identityToken, linkDeviceId? }`.
+- `POST /auth/google` — Sign in with Google (Android launch counterpart to
+  `/auth/apple`). Body: `{ idToken, linkDeviceId? }`.
 - `GET /progress` — current progress (requires `Authorization: Bearer <token>`).
   Lazily resolves any lives regen owed since the last call (`src/lib/lives.ts`)
   before returning.
@@ -46,6 +49,9 @@ liveness check.
 ## Still open
 
 - Real Apple receipt/transaction verification (`src/lib/appStoreServer.ts`).
+- Google Play Billing receipt/transaction verification — `/iap/validate-receipt`
+  only checks Apple's StoreKit 2 shape so far; needs an Android counterpart
+  once `14-boutique.md` is processed.
 - Crediting coins / activating subscriptions after a validated purchase —
   waiting on the product catalog from `14-boutique.md`.
 - Wiring `/progress/consume-life` and `/progress/complete-level` to an actual
