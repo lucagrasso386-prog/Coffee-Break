@@ -169,6 +169,11 @@ individual HD photos (`images/boost-*-hd.jpg`) instead of the shared
 the same pipeline used for the game elements -- no shadow, no false holes;
 `boost-cafe-latte`'s handle hole was correctly left open, same as before.
 
+`element-croissant` — the 6th and last game element, re-cut from
+`images/element-croissant-hd.jpg` the same way; came out clean on the first
+pass. Every game element and boost is now sourced from an individual HD
+photo rather than the original shared sheets.
+
 **Correction, per creator review**: `boost-cafe-latte`, `boost-cafe-a-emporter`,
 `boost-matcha-latte`, and `boost-canette-soda` all showed a thin residual pink
 fringe around their edges (JPEG chroma-subsampling bleed from the pink
