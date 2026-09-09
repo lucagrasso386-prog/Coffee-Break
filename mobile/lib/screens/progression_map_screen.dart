@@ -16,11 +16,12 @@ import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
 
 /// 09-carte-progression.md: the level map. Most decor art (palm trees,
-/// the "Coffee Bar" building, the sky, clouds) isn't in yet -- this is the
-/// scroll mechanism and level-node behavior on placeholder shapes, to be
-/// re-skinned once those assets arrive. The sand path and the grass
-/// ground (all three lighting variants, both of them) are in and already
-/// wired.
+/// hibiscus, plumeria, the "Coffee Bar" building, clouds) isn't in yet --
+/// this is the scroll mechanism and level-node behavior on placeholder
+/// shapes, to be re-skinned once those assets arrive. The sky, sand path,
+/// and grass ground (all three lighting variants, all three of them) are
+/// in and already wired.
+///
 /// Deliberately deferred for this pass, same as earlier files' pattern of
 /// modeling a not-yet-buildable system as data/behavior first: the
 /// day/night cycle, the biome change every 10 levels, and infinite level
@@ -55,6 +56,13 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   ui.Image? _pathTexture;
   ui.Image? _grassPlain;
   ui.Image? _grassTuft;
+  late final String _skyAsset;
+
+  static const Map<DayNightPeriod, String> _skyByPeriod = {
+    DayNightPeriod.day: 'assets/progression_map/sky_day.jpg',
+    DayNightPeriod.goldenHour: 'assets/progression_map/sky_golden.jpg',
+    DayNightPeriod.night: 'assets/progression_map/sky_night.jpg',
+  };
 
   double get _minRotation => 0;
   double get _maxRotation => (_nodes.length - 1) * _anglePerLevel;
@@ -70,6 +78,9 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   @override
   void initState() {
     super.initState();
+    // Fixed once per screen instance, same reasoning as HomeScreen's own
+    // background pick -- not re-evaluated on every rebuild.
+    _skyAsset = _skyByPeriod[DayNightSchedule.current()]!;
     _flingController = AnimationController.unbounded(vsync: this)
       ..addListener(() {
         setState(() {
@@ -271,17 +282,9 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Sky: fixed, never affected by the scroll -- placeholder
-                // gradient until the real sky art is in.
-                const DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Color(0xFF6EC6E8), Color(0xFFA8DFF0)],
-                    ),
-                  ),
-                ),
+                // Sky: fixed, never affected by the scroll -- per the spec,
+                // "jamais affecté par le mouvement."
+                Image.asset(_skyAsset, fit: BoxFit.cover),
                 // Ground: no horizon/hill art yet, so this is a plain
                 // horizontal cutoff rather than a shaped hillside -- a
                 // reasonable placeholder split, not a measured one.

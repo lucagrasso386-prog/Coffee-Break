@@ -482,20 +482,20 @@ the biome change every 10 levels, and true infinite level generation.
 spec's "1000 premiers niveaux pré-chargés"); the other 9000 of the "10 000
 accessible at launch" aren't generated yet.
 
-Most real art for the background/path/level buttons still doesn't exist --
-the two mockups are one merged composite each (background + path +
-buttons + HUD baked together), and the creator is sending individual
-clean elements instead of having them cropped out of the composites.
-Sky, clouds, palm trees, hibiscus, plumeria, Coffee Bar, and level buttons
-are all still placeholders: a flat sky-blue gradient and plain colored
-circles (with a glow + gold stars for validated levels, matte for not)
-standing in for the metallic level buttons. `lib/screens/progression_map_screen.dart`
-is built so re-skinning is mostly swapping what each placeholder paints,
-not restructuring the scroll logic itself. Since biome switching is
-deferred (see above), the transition bridge asset isn't needed for this
-pass either. No horizon/hill shape exists yet either, so the ground
-currently starts at a fixed 35% down the screen -- a placeholder split,
-not a measured one.
+Most real art for the level buttons still doesn't exist -- the two
+mockups are one merged composite each (background + path + buttons + HUD
+baked together), and the creator is sending individual clean elements
+instead of having them cropped out of the composites. Clouds, palm trees,
+hibiscus, plumeria, Coffee Bar, and level buttons are all still
+placeholders: plain colored circles (with a glow + gold stars for
+validated levels, matte for not) standing in for the metallic level
+buttons, nothing at all yet for the rest.
+`lib/screens/progression_map_screen.dart` is built so re-skinning is
+mostly swapping what each placeholder paints, not restructuring the
+scroll logic itself. Since biome switching is deferred (see above), the
+transition bridge asset isn't needed for this pass either. No horizon/hill
+shape exists yet either, so the ground currently starts at a fixed 35%
+down the screen -- a placeholder split, not a measured one.
 
 The sand path is real art now, in all three lighting variants
 (day/golden-hour/night). `DayNightSchedule.current()` (the same
@@ -535,12 +535,18 @@ point. Same crop coordinates (top strip) worked for all three variants
 since the golden-hour and night photos share the day one's exact
 composition, just a different color grade each.
 
-While asking about the sky, the creator mentioned the day/night cycle
-applies to `08-page-accueil.md`'s background too, not just this screen --
-already wired there (see that section above) once they sent the golden-
-hour and night variants. Every decor piece for *this* screen will need
-day/night pairs as well eventually, per the creator; not modeled yet
-since none of the tropical decor art exists here yet regardless.
+The sky itself is real art too, in all three lighting variants -- unlike
+the path and the grass, it's a single full-bleed `Image.asset` rather
+than a tiled `ImageShader` (nothing to repeat; it just fills the screen
+once), picked the same way `HomeScreen` picks its own background: once
+per screen instance in `initState` via `DayNightSchedule.current()`, not
+re-evaluated on every rebuild. It first came up when asking about the
+sky: the creator mentioned the day/night cycle applies to
+`08-page-accueil.md`'s background too, not just this screen -- already
+wired there (see that section above). Three pieces of level-map decor
+(sky, sand path, grass) now have complete day/night sets; the rest
+(clouds, palm trees, hibiscus, plumeria, Coffee Bar) will need the same
+treatment once their art exists, per the creator.
 
 The HUD row, on the other hand, is fully real art now (`_HudButton`
 still supports a Material `icon` placeholder as a fallback, but nothing
