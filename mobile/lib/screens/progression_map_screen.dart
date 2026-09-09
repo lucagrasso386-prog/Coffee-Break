@@ -19,7 +19,8 @@ import '../widgets/spring_button.dart';
 /// the "Coffee Bar" building, the sky, clouds) isn't in yet -- this is the
 /// scroll mechanism and level-node behavior on placeholder shapes, to be
 /// re-skinned once those assets arrive. The sand path (all three lighting
-/// variants) and the grass ground (day only) are in and already wired.
+/// variants) and the grass ground (day and golden hour) are in and
+/// already wired.
 /// Deliberately deferred for this pass, same as earlier files' pattern of
 /// modeling a not-yet-buildable system as data/behavior first: the
 /// day/night cycle, the biome change every 10 levels, and infinite level
@@ -120,15 +121,24 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   // top by `_GrassPainter`, per the creator's own "sometimes just green,
   // sometimes green with a tuft" direction.
   //
-  // Only a day variant exists so far -- unlike the sand path, there's no
-  // DayNightPeriod lookup yet since there's nothing to look up; add one
-  // the same way once golden-hour/night grass art arrives.
-  static const String _grassPlainAsset = 'assets/progression_map/grass_plain_day.jpg';
-  static const String _grassTuftAsset = 'assets/progression_map/grass_tuft_day.png';
+  // No night variant yet -- falls back to day, same as the sand path did
+  // before its own night texture arrived (night is the bigger lighting
+  // jump next to golden hour either way).
+  static const Map<DayNightPeriod, String> _grassPlainByPeriod = {
+    DayNightPeriod.day: 'assets/progression_map/grass_plain_day.jpg',
+    DayNightPeriod.goldenHour: 'assets/progression_map/grass_plain_golden.jpg',
+    DayNightPeriod.night: 'assets/progression_map/grass_plain_day.jpg',
+  };
+  static const Map<DayNightPeriod, String> _grassTuftByPeriod = {
+    DayNightPeriod.day: 'assets/progression_map/grass_tuft_day.png',
+    DayNightPeriod.goldenHour: 'assets/progression_map/grass_tuft_golden.png',
+    DayNightPeriod.night: 'assets/progression_map/grass_tuft_day.png',
+  };
 
   Future<void> _loadGrassTextures() async {
-    final plain = await _loadImage(_grassPlainAsset);
-    final tuft = await _loadImage(_grassTuftAsset);
+    final period = DayNightSchedule.current();
+    final plain = await _loadImage(_grassPlainByPeriod[period]!);
+    final tuft = await _loadImage(_grassTuftByPeriod[period]!);
     if (plain == null || tuft == null) return;
     setState(() {
       _grassPlain = plain;

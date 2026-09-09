@@ -515,20 +515,25 @@ the one frame or so before it's decoded. The tiling frequency is reasoned
 against the path's ~48px stroke width, not verified on a device -- worth
 a look once someone can actually see it scroll.
 
-The grass ground is real art too now (day only). The creator's source
-photo is one green field with several tufts already scattered across it
--- tiling that whole image would repeat the exact same tuft cluster in an
-obvious grid, so it's split in two: a tuft-free strip cropped from the
-same photo, tiled seamlessly as the continuous base (same `ImageShader` +
-`TileMode.mirror` trick as the path), and the tufts stamped sparsely on
-top by `_GrassPainter` at scattered, jittered positions (random offset,
-scale, rotation per cell, seeded per-cell so the layout is stable across
+The grass ground is real art too now (day and golden hour; night falls
+back to day, same reasoning as the sand path before its own night
+texture arrived). The creator's source photo is one green field with
+several tufts already scattered across it -- tiling that whole image
+would repeat the exact same tuft cluster in an obvious grid, so it's
+split in two: a tuft-free strip cropped from the same photo, tiled
+seamlessly as the continuous base (same `ImageShader` + `TileMode.mirror`
+trick as the path), and the tufts stamped sparsely on top by
+`_GrassPainter` at scattered, jittered positions (random offset, scale,
+rotation per cell, seeded per-cell so the layout is stable across
 rebuilds) -- directly per the creator's own instruction: "des fois tu
 mets l'image vert, des fois tu mets l'image vert avec la touffe d'herbe."
 The tuft image itself is pre-feathered to fully transparent at its own
-edges (a smoothstep radial falloff, done once in Python before saving the
-asset) so each stamp blends into the base with no visible square border,
-regardless of whether the two greens match exactly at that point.
+edges (a smoothstep radial falloff, done once in Python before saving
+each asset) so each stamp blends into the base with no visible square
+border, regardless of whether the two greens match exactly at that
+point. Same crop coordinates (top strip) worked for both variants since
+the golden-hour photo shares the day one's exact composition, just a
+different color grade.
 
 While asking about the sky, the creator mentioned the day/night cycle
 applies to `08-page-accueil.md`'s background too, not just this screen --
