@@ -412,7 +412,12 @@ class _Hud extends StatelessWidget {
       children: [
         Expanded(
           child: _HudPill(children: [
-            _HudButton(icon: Icons.favorite, color: Colors.pinkAccent, label: lives?.toString(), onTap: onLives),
+            _HudButton(
+              imageAsset: 'assets/hud/hud_heart.png',
+              color: Colors.pinkAccent,
+              label: lives?.toString(),
+              onTap: onLives,
+            ),
             // Same coin as 03-assets-de-jeu.md's currency -- already exists.
             _HudButton(
               imageAsset: Currency.coinCafe.assetName,
@@ -425,7 +430,11 @@ class _Hud extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: _HudPill(children: [
-            _HudButton(icon: Icons.explore, color: const Color(0xFFC9A15A), onTap: onMap),
+            _HudButton(
+              imageAsset: 'assets/hud/hud_compass.png',
+              color: const Color(0xFFC9A15A),
+              onTap: onMap,
+            ),
             // Same café-latte cup as the "café latte" boost -- the
             // creator confirmed it's the rewards icon too, no new asset.
             _HudButton(
@@ -433,7 +442,11 @@ class _Hud extends StatelessWidget {
               color: const Color(0xFF8A5A3B),
               onTap: onRewards,
             ),
-            _HudButton(icon: Icons.storefront, color: const Color(0xFF3FA796), onTap: onShop),
+            _HudButton(
+              imageAsset: 'assets/hud/hud_shop.png',
+              color: const Color(0xFF3FA796),
+              onTap: onShop,
+            ),
           ]),
         ),
       ],

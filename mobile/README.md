@@ -471,26 +471,38 @@ the biome change every 10 levels, and true infinite level generation.
 spec's "1000 premiers niveaux pré-chargés"); the other 9000 of the "10 000
 accessible at launch" aren't generated yet.
 
-No real art for this screen exists yet -- the two mockups are one
-merged composite each (background + path + buttons + HUD baked
-together), and the creator is sending individual clean elements instead
-of having them cropped out of the composites. Until then, the screen
-renders on placeholders: a flat sky-blue gradient, a painted line
-standing in for the sand path, plain colored circles (with a glow + gold
-stars for validated levels, matte for not) standing in for the metallic
-level buttons, and Material icons for most of the HUD row.
-`lib/screens/progression_map_screen.dart` is built so re-skinning is
-mostly swapping what each placeholder paints, not restructuring the
-scroll logic itself. Since biome switching is deferred (see above), the
-transition bridge asset isn't needed for this pass either.
+No real art for the background/path/level buttons exists yet -- the two
+mockups are one merged composite each (background + path + buttons + HUD
+baked together), and the creator is sending individual clean elements
+instead of having them cropped out of the composites. Until then, those
+still render on placeholders: a flat sky-blue gradient, a painted line
+standing in for the sand path, and plain colored circles (with a glow +
+gold stars for validated levels, matte for not) standing in for the
+metallic level buttons. `lib/screens/progression_map_screen.dart` is
+built so re-skinning is mostly swapping what each placeholder paints, not
+restructuring the scroll logic itself. Since biome switching is deferred
+(see above), the transition bridge asset isn't needed for this pass
+either.
 
-Two HUD icons turned out to already exist, reused as-is rather than
-waiting on new ones: the coin (`Currency.coinCafe`, same as
-`03-assets-de-jeu.md`'s currency) and the rewards cup (the "café latte"
-boost art, confirmed by the creator to be the same cup). `_HudButton`
-takes either a Material `icon` placeholder or a real `imageAsset`, so
-swapping in the remaining HUD art later (heart, compass, shop) is a
-one-line change each, same as the decor pools above.
+The HUD row, on the other hand, is fully real art now (`_HudButton`
+still supports a Material `icon` placeholder as a fallback, but nothing
+uses it here anymore): the coin and rewards cup turned out to already
+exist elsewhere (`Currency.coinCafe` from `03-assets-de-jeu.md`, and the
+"café latte" boost art, confirmed by the creator to be the same cup as
+the rewards icon) and got reused as-is; the heart, compass, and shop came
+as individual renders on a flat green background (`assets/hud/`). That
+green cutout turned up a variant of the same lesson as the buttons in
+`08-page-accueil.md`: these renders have a soft white-to-background glow
+around every edge, and a nearest-neighbor interior-color sampler picking
+its seed by raw distance from the exact background color can still land
+on a pale, glow-blended pixel that reads as green by hue even though it's
+numerically far from the background color (mostly by being much
+lighter). Fixed by testing the seed for green *hue* (green channel
+clearly above both red and blue) instead of distance from one specific
+green value. Also hit the same "real hole vs. false hole" question as the
+donut/café-latte sprites back in `03-assets-de-jeu.md`: the compass has a
+genuine hole (its hanging ring), so hole-filling only applies below a
+size threshold, same fix as before.
 
 The creator is planning to send more decor variety than just one of each
 piece (several palm trees, several flower clusters, ...), specifically so
