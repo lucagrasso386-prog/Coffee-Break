@@ -162,6 +162,13 @@ just a better cutout algorithm. Two more things worth recording:
   then sent a second photo of the same tartelette with no shadow, which
   sidesteps the problem entirely; that's the one actually used.
 
+All 5 boosts (`boost-cafe-latte`, `boost-cafe-a-emporter`, `boost-matcha-latte`,
+`boost-canette-soda`, `boost-jus-orange`) got the same treatment: re-cut from
+individual HD photos (`images/boost-*-hd.jpg`) instead of the shared
+`boosts-final.jpg` sheet crops. All five came out clean on the first pass with
+the same pipeline used for the game elements -- no shadow, no false holes;
+`boost-cafe-latte`'s handle hole was correctly left open, same as before.
+
 **Correction, per creator review**: `boost-cafe-latte`, `boost-cafe-a-emporter`,
 `boost-matcha-latte`, and `boost-canette-soda` all showed a thin residual pink
 fringe around their edges (JPEG chroma-subsampling bleed from the pink
