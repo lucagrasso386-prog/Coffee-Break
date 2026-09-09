@@ -94,12 +94,10 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     }
   }
 
-  // Night variant not sent yet -- falls back to day rather than golden
-  // hour, since night is the bigger lighting jump either way.
   static const Map<DayNightPeriod, String> _pathTextureByPeriod = {
     DayNightPeriod.day: 'assets/progression_map/sand_path_day.jpg',
     DayNightPeriod.goldenHour: 'assets/progression_map/sand_path_golden.jpg',
-    DayNightPeriod.night: 'assets/progression_map/sand_path_day.jpg',
+    DayNightPeriod.night: 'assets/progression_map/sand_path_night.jpg',
   };
 
   Future<void> _loadPathTexture() async {

@@ -495,13 +495,12 @@ mostly swapping what each placeholder paints, not restructuring the
 scroll logic itself. Since biome switching is deferred (see above), the
 transition bridge asset isn't needed for this pass either.
 
-The sand path is real art now, in the day and golden-hour variants sent
-so far (night not sent for this piece yet -- falls back to the day
-texture rather than golden hour, since night is the bigger lighting jump
-either way). `DayNightSchedule.current()` (the same phone-local-time
-mapping the home screen uses) picks which one to load, confirming this
-piece follows the day/night cycle too, not just the home screen
-background. `_PathPainter` strokes the path through the node centers
+The sand path is real art now, in all three lighting variants
+(day/golden-hour/night). `DayNightSchedule.current()` (the same
+phone-local-time mapping the home screen uses) picks which one to load,
+confirming this piece follows the day/night cycle too, not just the home
+screen background -- first full day/night set for any piece of level-map
+decor. `_PathPainter` strokes the path through the node centers
 using the actual texture as an `ImageShader`, tiled well below its native
 1024px size so it reads as a repeating grain rather than one giant blotch
 stretched along the path, and with `TileMode.mirror` (not `.repeated`) so
