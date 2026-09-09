@@ -78,8 +78,9 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     'assets/progression_map/twinkle_star_small.png',
   ];
 
-  // No night variant yet -- falls back to day, same as the sand path and
-  // grass did before their own night textures arrived.
+  // Per the creator ("pas de nuage la nuit"): no clouds at night at all --
+  // the twinkle field owns the night sky instead. `_cloudCount` is forced
+  // to 0 for that period in initState, so night has no entry here.
   static const Map<DayNightPeriod, List<String>> _cloudAssetsByPeriod = {
     DayNightPeriod.day: [
       'assets/progression_map/cloud_1_day.png',
@@ -88,10 +89,6 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     DayNightPeriod.goldenHour: [
       'assets/progression_map/cloud_1_golden.png',
       'assets/progression_map/cloud_2_golden.png',
-    ],
-    DayNightPeriod.night: [
-      'assets/progression_map/cloud_1_day.png',
-      'assets/progression_map/cloud_2_day.png',
     ],
   };
 
@@ -123,8 +120,8 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     // background pick -- not re-evaluated on every rebuild.
     _period = DayNightSchedule.current();
     _skyAsset = _skyByPeriod[_period]!;
-    _cloudCount = CloudSchedule.countFor();
-    _cloudAssets = _cloudAssetsByPeriod[_period]!;
+    _cloudCount = _period == DayNightPeriod.night ? 0 : CloudSchedule.countFor();
+    _cloudAssets = _cloudAssetsByPeriod[_period] ?? const [];
     _flingController = AnimationController.unbounded(vsync: this)
       ..addListener(() {
         setState(() {

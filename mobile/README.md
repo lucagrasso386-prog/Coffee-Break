@@ -593,8 +593,10 @@ boundaries. Unlike the twinkle field, clouds sit at 3 fixed positions
 scatter -- with only 2-3 on screen, a deliberate placement reads better
 than a seeded-random one; today's count just picks how many of those
 fixed slots render, cycling through the period's 2 shapes by index.
-Night still reuses the day art, same fallback the sand path and grass
-used before their own night variants arrived.
+Night gets no clouds at all -- per the creator ("pas de nuage la nuit"),
+`_cloudCount` is forced to 0 for that period rather than falling back to
+the day art like the sand path and grass did before their own night
+variants arrived; the twinkle field is the night sky's only decor.
 
 The HUD row, on the other hand, is fully real art now (`_HudButton`
 still supports a Material `icon` placeholder as a fallback, but nothing
