@@ -141,6 +141,24 @@ to replace the initial extraction from the original draft sheets
 `/images` for reference). Each item was cropped and isolated from the pink
 background; pixel content of every item was left untouched.
 
+**Correction, per creator review**: `boost-cafe-latte`, `boost-cafe-a-emporter`,
+`boost-matcha-latte`, and `boost-canette-soda` all showed a thin residual pink
+fringe around their edges (JPEG chroma-subsampling bleed from the pink
+backdrop, a few pixels deep — the same root cause as the chantilly fringe
+under `05-mecaniques-de-jeu.md` below, fixed the same way: erode a few px past
+the contaminated band, then a tight 1px feather with background-color
+unmixing on the clean boundary). Re-extracting surfaced two more things to
+get right, not just copy blindly across all four:
+- `boost-cafe-latte`'s cup handle has a real hole (background visible through
+  the loop) that a blind "fill every enclosed gap" pass would have plugged
+  with solid color -- fixed by only auto-filling small (≤500px) holes, which
+  catches antialiasing noise while leaving a real hole like this one alone.
+- `boost-canette-soda`'s glossy highlights on the red can are coincidentally
+  close to the pink background color at a few spots, which the same
+  color-distance segmentation misread as small background gaps *inside* the
+  can body -- these aren't real, so (unlike the cup handle) they're exactly
+  what that small-hole auto-fill is for.
+
 ## Match-3 mechanics assets and data (`05-mecaniques-de-jeu.md`)
 
 - `assets/special_pieces/` — the 3 special pieces (tourbillon, bombe aux
