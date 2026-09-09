@@ -81,11 +81,14 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       `mobile/lib/widgets/cylinder_projection.dart`), level button states,
       and HUD are built and wired from "PLAY"
       (`mobile/lib/screens/progression_map_screen.dart`). The HUD is real
-      art now (5/5 icons); the background/path/level buttons still run on
-      placeholders — the creator is sending individual decor elements
-      (including sky/clouds/grass, and day/night pairs of each) rather
-      than having them cropped from the two merged mockups. Day/night
-      cycle *for the level map itself*, the biome swap every 10 levels,
-      and infinite level generation past the first 1000 preloaded are
-      still explicitly deferred. See `mobile/README.md` for details. `10`
-      onward not started yet.
+      art now (5/5 icons); sky/path/grass have full day/golden/night sets,
+      clouds have day/golden (none at night, by design); level buttons are
+      real art for day/golden hour (4 colors × unlit/lit) but still the
+      placeholder circle at night, since the creator wants night's
+      validated glow noticeably brighter than day's and no night button
+      art exists yet to show that. Decor scatter (palm trees, hibiscus,
+      plumeria, the Coffee Bar building) is still empty pools, ready for
+      variants once sent. Day/night cycle *for the level map itself*, the
+      biome swap every 10 levels, and infinite level generation past the
+      first 1000 preloaded are still explicitly deferred. See
+      `mobile/README.md` for details. `10` onward not started yet.

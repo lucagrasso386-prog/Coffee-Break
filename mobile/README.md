@@ -618,6 +618,37 @@ donut/café-latte sprites back in `03-assets-de-jeu.md`: the compass has a
 genuine hole (its hanging ring), so hole-filling only applies below a
 size threshold, same fix as before.
 
+Level buttons are real art too now, for day and golden hour (the
+creator: "jour et golden hour c'est les meme pour ca" -- one asset set
+covers both). 4 colors (blue, purple, pink, and a teal one that maps to
+`LevelButtonColor.lightBlue`) times 2 states (unlit/not-validated, lit/
+validated-and-glowing), all 8 cut from two green chroma-key composites
+(one row of 4 buttons unlit, the same row lit). `_LevelNode` in
+`progression_map_screen.dart` picks the lit or unlit asset by
+`node.validated`, sized wider than the old placeholder's plain circle
+since the real bezel extends past it, with the level number drawn over
+it in a `Stack` (given a text shadow now, since it sits on photographic
+art rather than a flat color). Night keeps the old placeholder circle
+for now rather than reusing this day set: the creator was explicit that
+night's validated glow needs to read as noticeably brighter than day's,
+so silently reusing the day art (the fallback every other decor layer
+used before its own night variant arrived) would misrepresent that once
+real night art lands -- better an honest placeholder than a wrong
+"final" look.
+
+This cutout hit a new failure mode the others hadn't: unlike a flat
+render, these buttons have a shiny metal bezel that's genuinely
+reflective in the source photo, so it picked up green spill from the
+chroma-key background baked into fully-opaque interior pixels (not just
+a soft edge blend at the alpha boundary, like every earlier cutout's
+issue). Edge decontamination alone doesn't touch that -- it only
+touches partial-alpha pixels. Fixed with a proper despill pass: any
+pixel where green measurably exceeds the red/blue midpoint gets pulled
+down to that midpoint. Applied to blue, purple, and pink (safe, since
+none of those are ever meant to look green); skipped for the teal
+button, since its whole point is being green-dominant and despilling it
+would have eaten its real color along with the spill.
+
 The creator is planning to send more decor variety than just one of each
 piece (several palm trees, several flower clusters, ...), specifically so
 the path doesn't read as one motif copy-pasted down its whole length --

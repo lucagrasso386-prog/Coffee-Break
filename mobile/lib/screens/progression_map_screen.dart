@@ -294,7 +294,11 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                     opacity: v.point.opacity,
                     child: Transform.scale(
                       scale: v.point.scale,
-                      child: _LevelNode(node: v.node, onTap: () => _openLevel(v.node)),
+                      child: _LevelNode(
+                        node: v.node,
+                        onTap: () => _openLevel(v.node),
+                        period: _period,
+                      ),
                     ),
                   ),
                 ),
@@ -554,12 +558,39 @@ class _GrassPainter extends CustomPainter {
 }
 
 class _LevelNode extends StatelessWidget {
-  const _LevelNode({required this.node, required this.onTap});
+  const _LevelNode({required this.node, required this.onTap, required this.period});
 
   final LevelMapNode node;
   final VoidCallback onTap;
+  final DayNightPeriod period;
 
   static const double _diameter = 68;
+
+  // The real art's metal bezel extends past the plain circle the
+  // placeholder used, so it's displayed wider than `_diameter` -- both
+  // the unlit and lit variants share this width so nodes stay evenly
+  // spaced regardless of validated state.
+  static const double _artWidth = _diameter * 1.55;
+
+  // Real art only for day/golden hour so far (the creator: "jour et
+  // golden hour c'est les meme"). Night is still the placeholder circle
+  // below -- the creator's explicit ask is that night's validated glow
+  // read as noticeably brighter than day's, so reusing this day art for
+  // night (like the other decor layers do while waiting on their own
+  // night set) would misrepresent that once the night art actually
+  // arrives.
+  static const Map<LevelButtonColor, String> _unlitAsset = {
+    LevelButtonColor.blue: 'assets/progression_map/button_blue_day.png',
+    LevelButtonColor.purple: 'assets/progression_map/button_purple_day.png',
+    LevelButtonColor.pink: 'assets/progression_map/button_pink_day.png',
+    LevelButtonColor.lightBlue: 'assets/progression_map/button_lightblue_day.png',
+  };
+  static const Map<LevelButtonColor, String> _litAsset = {
+    LevelButtonColor.blue: 'assets/progression_map/button_blue_day_lit.png',
+    LevelButtonColor.purple: 'assets/progression_map/button_purple_day_lit.png',
+    LevelButtonColor.pink: 'assets/progression_map/button_pink_day_lit.png',
+    LevelButtonColor.lightBlue: 'assets/progression_map/button_lightblue_day_lit.png',
+  };
 
   Color get _baseColor {
     switch (node.color) {
@@ -576,6 +607,12 @@ class _LevelNode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final useRealArt = period != DayNightPeriod.night;
+    const numberStyle = TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.bold,
+      shadows: [Shadow(color: Colors.black45, blurRadius: 3)],
+    );
     return SpringButton(
       onPressed: onTap,
       child: Column(
@@ -594,26 +631,38 @@ class _LevelNode extends StatelessWidget {
                   )
                 : null,
           ),
-          Container(
-            width: _diameter,
-            height: _diameter,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                center: const Alignment(-0.3, -0.3),
-                colors: [_baseColor.withOpacity(0.95), _baseColor],
+          if (useRealArt)
+            SizedBox(
+              width: _artWidth,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.asset(
+                    node.validated ? _litAsset[node.color]! : _unlitAsset[node.color]!,
+                    width: _artWidth,
+                  ),
+                  Text('${node.number}', style: numberStyle),
+                ],
               ),
-              border: Border.all(color: Colors.white.withOpacity(0.85), width: 3),
-              boxShadow: node.validated
-                  ? [BoxShadow(color: _baseColor.withOpacity(0.85), blurRadius: 18, spreadRadius: 4)]
-                  : const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+            )
+          else
+            Container(
+              width: _diameter,
+              height: _diameter,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  center: const Alignment(-0.3, -0.3),
+                  colors: [_baseColor.withOpacity(0.95), _baseColor],
+                ),
+                border: Border.all(color: Colors.white.withOpacity(0.85), width: 3),
+                boxShadow: node.validated
+                    ? [BoxShadow(color: _baseColor.withOpacity(0.85), blurRadius: 18, spreadRadius: 4)]
+                    : const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+              ),
+              child: Text('${node.number}', style: numberStyle),
             ),
-            child: Text(
-              '${node.number}',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
         ],
       ),
     );
