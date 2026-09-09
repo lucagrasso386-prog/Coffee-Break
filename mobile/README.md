@@ -141,6 +141,27 @@ to replace the initial extraction from the original draft sheets
 `/images` for reference). Each item was cropped and isolated from the pink
 background; pixel content of every item was left untouched.
 
+**Re-extraction, per creator review**: `element-cupcake-glacage-chocolat`,
+`element-tartelette-fraise-chantilly`, `element-donut-glacage-rose`, and
+`element-bretzel` (`element-part-gateau-couches` too, proactively, since it
+came from the same batch) were re-cut from new, individual full-resolution
+photos the creator provided per item (`images/element-*-hd.jpg`), replacing
+the versions cropped from the shared `elements-final.jpg` sheet — same fringe
+issue as the boosts, now fixed at the source with cleaner photos instead of
+just a better cutout algorithm. Two more things worth recording:
+- **Donut**: the darker pink drizzle lines coincidentally read as close
+  enough to the pink background color that a naive cutout put false holes
+  straight through the icing (background showing through the drizzle) while
+  correctly leaving the true center hole open. Fixed by only auto-filling
+  holes below a size threshold that's comfortably under the real hole's
+  size, so the false ones get patched and the true one doesn't.
+- **Tartelette**: the first HD photo the creator sent had a soft cast shadow
+  under the tart on the pink backdrop -- the same kind of shadow-blends-into-
+  background problem chantilly had, and several fixes were tried (edge
+  tracing, watershed segmentation) without fully resolving it. The creator
+  then sent a second photo of the same tartelette with no shadow, which
+  sidesteps the problem entirely; that's the one actually used.
+
 **Correction, per creator review**: `boost-cafe-latte`, `boost-cafe-a-emporter`,
 `boost-matcha-latte`, and `boost-canette-soda` all showed a thin residual pink
 fringe around their edges (JPEG chroma-subsampling bleed from the pink
