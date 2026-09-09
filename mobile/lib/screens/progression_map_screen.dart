@@ -16,14 +16,14 @@ import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
 
 /// 09-carte-progression.md: the level map. Most decor art (palm trees,
-/// the "Coffee Bar" building, the sky, clouds, grass) isn't in yet -- this
-/// is the scroll mechanism and level-node behavior on placeholder shapes,
-/// to be re-skinned once those assets arrive. The sand path texture is in
-/// (day variant only) and already wired. Deliberately deferred for this
-/// pass, same as earlier files' pattern of modeling a not-yet-buildable
-/// system as data/behavior first: the day/night cycle, the biome change
-/// every 10 levels, and infinite level generation past the first 1000
-/// preloaded (see `LevelMapGenerator`).
+/// the "Coffee Bar" building, the sky, clouds) isn't in yet -- this is the
+/// scroll mechanism and level-node behavior on placeholder shapes, to be
+/// re-skinned once those assets arrive. The sand path (all three lighting
+/// variants) and the grass ground (day only) are in and already wired.
+/// Deliberately deferred for this pass, same as earlier files' pattern of
+/// modeling a not-yet-buildable system as data/behavior first: the
+/// day/night cycle, the biome change every 10 levels, and infinite level
+/// generation past the first 1000 preloaded (see `LevelMapGenerator`).
 class ProgressionMapScreen extends StatefulWidget {
   const ProgressionMapScreen({super.key});
 
@@ -52,6 +52,8 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
       LevelMapGenerator.generatePreloaded(unlockedLevel: 0);
   ProgressDTO? _progress;
   ui.Image? _pathTexture;
+  ui.Image? _grassPlain;
+  ui.Image? _grassTuft;
 
   double get _minRotation => 0;
   double get _maxRotation => (_nodes.length - 1) * _anglePerLevel;
@@ -75,6 +77,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
       });
     _loadProgress();
     _loadPathTexture();
+    _loadGrassTextures();
   }
 
   Future<void> _loadProgress() async {
@@ -102,20 +105,54 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
 
   Future<void> _loadPathTexture() async {
     final asset = _pathTextureByPeriod[DayNightSchedule.current()]!;
+    final image = await _loadImage(asset);
+    if (image == null) return;
+    setState(() => _pathTexture = image);
+  }
+
+  // Ground fill: the creator's source photo is one green field with a
+  // handful of grass tufts scattered on it. Tiling that whole image would
+  // repeat the exact same tuft cluster in a visible grid, so it's split
+  // into two pieces here instead -- a tuft-free strip tiled seamlessly
+  // (via ImageShader, same mirroring trick as the sand path) as the
+  // continuous base, and the tufts (feathered to transparent at the edges
+  // so stamping them leaves no visible square edge) scattered sparsely on
+  // top by `_GrassPainter`, per the creator's own "sometimes just green,
+  // sometimes green with a tuft" direction.
+  //
+  // Only a day variant exists so far -- unlike the sand path, there's no
+  // DayNightPeriod lookup yet since there's nothing to look up; add one
+  // the same way once golden-hour/night grass art arrives.
+  static const String _grassPlainAsset = 'assets/progression_map/grass_plain_day.jpg';
+  static const String _grassTuftAsset = 'assets/progression_map/grass_tuft_day.png';
+
+  Future<void> _loadGrassTextures() async {
+    final plain = await _loadImage(_grassPlainAsset);
+    final tuft = await _loadImage(_grassTuftAsset);
+    if (plain == null || tuft == null) return;
+    setState(() {
+      _grassPlain = plain;
+      _grassTuft = tuft;
+    });
+  }
+
+  Future<ui.Image?> _loadImage(String asset) async {
     final bytes = await rootBundle.load(asset);
     final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
     final frame = await codec.getNextFrame();
     if (!mounted) {
       frame.image.dispose();
-      return;
+      return null;
     }
-    setState(() => _pathTexture = frame.image);
+    return frame.image;
   }
 
   @override
   void dispose() {
     _flingController.dispose();
     _pathTexture?.dispose();
+    _grassPlain?.dispose();
+    _grassTuft?.dispose();
     super.dispose();
   }
 
@@ -238,6 +275,18 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                     ),
                   ),
                 ),
+                // Ground: no horizon/hill art yet, so this is a plain
+                // horizontal cutoff rather than a shaped hillside -- a
+                // reasonable placeholder split, not a measured one.
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: height * 0.35,
+                  bottom: 0,
+                  child: CustomPaint(
+                    painter: _GrassPainter(_grassPlain, _grassTuft),
+                  ),
+                ),
                 CustomPaint(
                   size: Size(width, height),
                   painter: _PathPainter(visible, _pathTexture),
@@ -352,6 +401,80 @@ class _PathPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PathPainter oldDelegate) => true;
+}
+
+/// The ground: a seamlessly-tiled plain-green base (`plain`, via the same
+/// mirrored `ImageShader` trick as the path) with `tuft` stamped sparsely
+/// on top at scattered, jittered positions -- "des fois tu mets l'image
+/// vert, des fois tu mets l'image vert avec la touffe d'herbe." `tuft`'s
+/// own edges are pre-feathered to transparent (see mobile/README.md), so
+/// each stamp blends into the base without a visible square border.
+class _GrassPainter extends CustomPainter {
+  _GrassPainter(this.plain, this.tuft);
+
+  final ui.Image? plain;
+  final ui.Image? tuft;
+
+  static const double _baseScale = 0.55;
+  static const double _cellSize = 130;
+  static const double _tuftChance = 0.4;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final base = plain;
+    if (base == null) {
+      canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFF6FBF4A));
+    } else {
+      canvas.drawRect(
+        Offset.zero & size,
+        Paint()
+          ..shader = ImageShader(
+            base,
+            TileMode.mirror,
+            TileMode.mirror,
+            (Matrix4.identity()..scale(_baseScale)).storage,
+          ),
+      );
+    }
+
+    final tuftImage = tuft;
+    if (tuftImage == null) return;
+    final cols = (size.width / _cellSize).ceil();
+    final rows = (size.height / _cellSize).ceil();
+    final srcRect = Rect.fromLTWH(
+      0,
+      0,
+      tuftImage.width.toDouble(),
+      tuftImage.height.toDouble(),
+    );
+    for (var row = 0; row < rows; row++) {
+      for (var col = 0; col < cols; col++) {
+        // Seeded per cell (not per frame) so the layout is stable across
+        // rebuilds instead of re-rolling every scroll tick.
+        final rng = math.Random(row * 92821 + col * 68917);
+        if (rng.nextDouble() > _tuftChance) continue;
+        final cx = (col + 0.5) * _cellSize + (rng.nextDouble() - 0.5) * _cellSize * 0.5;
+        final cy = (row + 0.5) * _cellSize + (rng.nextDouble() - 0.5) * _cellSize * 0.5;
+        final scale = 0.6 + rng.nextDouble() * 0.5;
+        final tileSize = _cellSize * scale;
+
+        canvas.save();
+        canvas.translate(cx, cy);
+        canvas.rotate((rng.nextDouble() - 0.5) * 0.35);
+        canvas.drawImageRect(
+          tuftImage,
+          srcRect,
+          Rect.fromCenter(center: Offset.zero, width: tileSize, height: tileSize),
+          Paint()..filterQuality = FilterQuality.medium,
+        );
+        canvas.restore();
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GrassPainter oldDelegate) =>
+      plain != oldDelegate.plain || tuft != oldDelegate.tuft;
 }
 
 class _LevelNode extends StatelessWidget {

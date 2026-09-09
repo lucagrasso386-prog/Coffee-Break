@@ -486,14 +486,16 @@ Most real art for the background/path/level buttons still doesn't exist --
 the two mockups are one merged composite each (background + path +
 buttons + HUD baked together), and the creator is sending individual
 clean elements instead of having them cropped out of the composites.
-Sky, clouds, grass, palm trees, hibiscus, plumeria, Coffee Bar, and level
-buttons are all still placeholders: a flat sky-blue gradient, plain
-colored circles (with a glow + gold stars for validated levels, matte for
-not) standing in for the metallic level buttons, no ground layer at all
-yet. `lib/screens/progression_map_screen.dart` is built so re-skinning is
-mostly swapping what each placeholder paints, not restructuring the
-scroll logic itself. Since biome switching is deferred (see above), the
-transition bridge asset isn't needed for this pass either.
+Sky, clouds, palm trees, hibiscus, plumeria, Coffee Bar, and level buttons
+are all still placeholders: a flat sky-blue gradient and plain colored
+circles (with a glow + gold stars for validated levels, matte for not)
+standing in for the metallic level buttons. `lib/screens/progression_map_screen.dart`
+is built so re-skinning is mostly swapping what each placeholder paints,
+not restructuring the scroll logic itself. Since biome switching is
+deferred (see above), the transition bridge asset isn't needed for this
+pass either. No horizon/hill shape exists yet either, so the ground
+currently starts at a fixed 35% down the screen -- a placeholder split,
+not a measured one.
 
 The sand path is real art now, in all three lighting variants
 (day/golden-hour/night). `DayNightSchedule.current()` (the same
@@ -512,6 +514,21 @@ can't await one mid-`paint()`); falls back to the old flat tan color for
 the one frame or so before it's decoded. The tiling frequency is reasoned
 against the path's ~48px stroke width, not verified on a device -- worth
 a look once someone can actually see it scroll.
+
+The grass ground is real art too now (day only). The creator's source
+photo is one green field with several tufts already scattered across it
+-- tiling that whole image would repeat the exact same tuft cluster in an
+obvious grid, so it's split in two: a tuft-free strip cropped from the
+same photo, tiled seamlessly as the continuous base (same `ImageShader` +
+`TileMode.mirror` trick as the path), and the tufts stamped sparsely on
+top by `_GrassPainter` at scattered, jittered positions (random offset,
+scale, rotation per cell, seeded per-cell so the layout is stable across
+rebuilds) -- directly per the creator's own instruction: "des fois tu
+mets l'image vert, des fois tu mets l'image vert avec la touffe d'herbe."
+The tuft image itself is pre-feathered to fully transparent at its own
+edges (a smoothstep radial falloff, done once in Python before saving the
+asset) so each stamp blends into the base with no visible square border,
+regardless of whether the two greens match exactly at that point.
 
 While asking about the sky, the creator mentioned the day/night cycle
 applies to `08-page-accueil.md`'s background too, not just this screen --
