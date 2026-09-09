@@ -48,6 +48,7 @@ flutter:
     - assets/ui/
     - assets/home/
     - assets/hud/
+    - assets/progression_map/
 
 flutter_launcher_icons:
   image_path: "assets/icon/icon-1024.png"

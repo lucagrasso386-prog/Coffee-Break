@@ -482,21 +482,32 @@ the biome change every 10 levels, and true infinite level generation.
 spec's "1000 premiers niveaux pré-chargés"); the other 9000 of the "10 000
 accessible at launch" aren't generated yet.
 
-No real art for the background/path/level buttons exists yet -- the two
-mockups are one merged composite each (background + path + buttons + HUD
-baked together), and the creator is sending individual clean elements
-instead of having them cropped out of the composites. Until then, those
-still render on placeholders: a flat sky-blue gradient, a painted line
-standing in for the sand path, and plain colored circles (with a glow +
-gold stars for validated levels, matte for not) standing in for the
-metallic level buttons. `lib/screens/progression_map_screen.dart` is
-built so re-skinning is mostly swapping what each placeholder paints, not
-restructuring the scroll logic itself. Since biome switching is deferred
-(see above), the transition bridge asset isn't needed for this pass
-either. Confirmed still needed on top of the original list (palm trees,
-hibiscus, plumeria, Coffee Bar, sand path, level buttons): the sky itself
-(currently a flat two-color gradient, no texture) and the grass the path
-sits on, which doesn't exist as a layer at all yet.
+Most real art for the background/path/level buttons still doesn't exist --
+the two mockups are one merged composite each (background + path +
+buttons + HUD baked together), and the creator is sending individual
+clean elements instead of having them cropped out of the composites.
+Sky, clouds, grass, palm trees, hibiscus, plumeria, Coffee Bar, and level
+buttons are all still placeholders: a flat sky-blue gradient, plain
+colored circles (with a glow + gold stars for validated levels, matte for
+not) standing in for the metallic level buttons, no ground layer at all
+yet. `lib/screens/progression_map_screen.dart` is built so re-skinning is
+mostly swapping what each placeholder paints, not restructuring the
+scroll logic itself. Since biome switching is deferred (see above), the
+transition bridge asset isn't needed for this pass either.
+
+The sand path is real art now, though (day variant only -- night wasn't
+sent for this piece yet). `_PathPainter` strokes the path through the
+node centers using the actual texture as an `ImageShader`, tiled well
+below its native 1024px size so it reads as a repeating grain rather than
+one giant blotch stretched along the path, and with `TileMode.mirror`
+(not `.repeated`) so adjacent tiles always match at the seam -- mirroring
+is seamless by construction even though the source photo itself isn't a
+tileable pattern. Loaded once asynchronously in `initState` via
+`instantiateImageCodec` (a `CustomPainter` needs a ready `ui.Image`, it
+can't await one mid-`paint()`); falls back to the old flat tan color for
+the one frame or so before it's decoded. The tiling frequency is reasoned
+against the path's ~48px stroke width, not verified on a device -- worth
+a look once someone can actually see it scroll.
 
 While asking about the sky, the creator mentioned the day/night cycle
 applies to `08-page-accueil.md`'s background too, not just this screen --

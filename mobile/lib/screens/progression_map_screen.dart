@@ -1,7 +1,9 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/currency.dart';
 import '../models/decor_variant.dart';
@@ -12,10 +14,11 @@ import '../widgets/cylinder_projection.dart';
 import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
 
-/// 09-carte-progression.md: the level map. Real decor art (palm trees,
-/// the "Coffee Bar" building, sand path texture) isn't in yet -- this is
-/// the scroll mechanism and level-node behavior on placeholder shapes, to
-/// be re-skinned once those assets arrive. Deliberately deferred for this
+/// 09-carte-progression.md: the level map. Most decor art (palm trees,
+/// the "Coffee Bar" building, the sky, clouds, grass) isn't in yet -- this
+/// is the scroll mechanism and level-node behavior on placeholder shapes,
+/// to be re-skinned once those assets arrive. The sand path texture is in
+/// (day variant only) and already wired. Deliberately deferred for this
 /// pass, same as earlier files' pattern of modeling a not-yet-buildable
 /// system as data/behavior first: the day/night cycle, the biome change
 /// every 10 levels, and infinite level generation past the first 1000
@@ -47,6 +50,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   List<LevelMapNode> _nodes =
       LevelMapGenerator.generatePreloaded(unlockedLevel: 0);
   ProgressDTO? _progress;
+  ui.Image? _pathTexture;
 
   double get _minRotation => 0;
   double get _maxRotation => (_nodes.length - 1) * _anglePerLevel;
@@ -69,6 +73,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
         });
       });
     _loadProgress();
+    _loadPathTexture();
   }
 
   Future<void> _loadProgress() async {
@@ -88,9 +93,21 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     }
   }
 
+  Future<void> _loadPathTexture() async {
+    final bytes = await rootBundle.load('assets/progression_map/sand_path_day.jpg');
+    final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    if (!mounted) {
+      frame.image.dispose();
+      return;
+    }
+    setState(() => _pathTexture = frame.image);
+  }
+
   @override
   void dispose() {
     _flingController.dispose();
+    _pathTexture?.dispose();
     super.dispose();
   }
 
@@ -215,7 +232,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                 ),
                 CustomPaint(
                   size: Size(width, height),
-                  painter: _PathPainter(visible),
+                  painter: _PathPainter(visible, _pathTexture),
                 ),
                 for (final item in sceneItems) item.widget,
                 Positioned(
@@ -274,13 +291,23 @@ class _SceneItem {
   final Widget widget;
 }
 
-/// Placeholder for the sand path texture: a stroked line through the
-/// visible nodes' centers, so the zigzag/curve is visible before the real
-/// art exists.
+/// A stroked line through the visible nodes' centers, painted with the
+/// real sand texture once it's loaded (flat tan color as a fallback while
+/// it isn't). The path itself is still a stand-in for real sand-path art
+/// (with a sculpted edge, footprints, etc.) -- this just stops the
+/// interior from being a flat color.
 class _PathPainter extends CustomPainter {
-  _PathPainter(this.nodes);
+  _PathPainter(this.nodes, this.texture);
 
   final List<_ProjectedNode> nodes;
+  final ui.Image? texture;
+
+  /// Shrinks the (1024px) source texture so it repeats roughly every
+  /// ~185 logical px along the path instead of one giant blotch per
+  /// screen, reasoned against the path's own ~48px stroke width -- not
+  /// verified on a device (this environment can't run Flutter), so the
+  /// exact tiling frequency may need a pass once someone can see it.
+  static const double _textureScale = 0.18;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -290,12 +317,28 @@ class _PathPainter extends CustomPainter {
     for (final n in sorted.skip(1)) {
       path.lineTo(n.centerX, n.point.dy);
     }
+
     final paint = Paint()
-      ..color = const Color(0xFFD8B888).withOpacity(0.65)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 48
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
+
+    final tex = texture;
+    if (tex != null) {
+      // TileMode.mirror rather than .repeated: mirroring always matches
+      // pixel-for-pixel at each tile edge, so the texture repeats with no
+      // visible seam even though the source photo isn't seamless.
+      paint.shader = ImageShader(
+        tex,
+        TileMode.mirror,
+        TileMode.mirror,
+        (Matrix4.identity()..scale(_textureScale)).storage,
+      );
+    } else {
+      paint.color = const Color(0xFFD8B888).withOpacity(0.65);
+    }
+
     canvas.drawPath(path, paint);
   }
 
