@@ -14,10 +14,12 @@ ship at launch (see the root `README.md` architecture note).
   - Enable capabilities: **Sign In with Apple**, **In-App Purchase**.
 - [ ] Create a new **App Store Connect** app record using that Bundle ID.
       (App name comes from `02-identite-visuelle.md`.)
-- [ ] Update the Bundle ID in two places once created:
+- [ ] Update the Bundle ID in three places once created:
+  - `codemagic.yaml` → `bundle_identifier` (and `APP_STORE_APPLE_ID`, the
+    numeric Apple ID shown in App Store Connect → App Information)
   - the generated `mobile/ios/Runner.xcodeproj` (via Xcode's Signing &
     Capabilities tab, after running `flutter create .` — see
-    `mobile/README.md`)
+    `mobile/README.md`) — only needed if you also build locally on a Mac
   - `backend/.env` → `APPLE_BUNDLE_ID`
 
 ## 2. Google Play Console
@@ -38,7 +40,44 @@ ship at launch (see the root `README.md` architecture note).
 - [ ] Enable **Play App Signing** when first uploading a build — Google
       manages the release signing key from then on.
 
-## 3. In-App Purchase products
+## 3. Codemagic (build the iOS app on a Mac you don't own)
+
+No Mac is available anywhere in this project's toolchain (not this coding
+session, and per your setup, not you either) — but building an iOS `.ipa`
+and signing it for TestFlight is an Apple requirement that always needs a
+real Mac somewhere. [Codemagic](https://codemagic.io) rents that Mac by the
+build-minute and can push straight to TestFlight when it's done, so this is
+how you test on your iPhone without buying one. `codemagic.yaml` at the repo
+root is already configured for this — it just needs your credentials, which
+only you can provide:
+
+- [ ] Create a Codemagic account and connect it to this GitHub repo.
+- [ ] In Codemagic → your team → **Integrations** → **App Store Connect**,
+      add an API key:
+  - In App Store Connect → Users and Access → Integrations → App Store
+    Connect API, generate a key with **App Manager** access.
+  - Give the Codemagic integration the exact name `coffee_break_asc_api_key`
+    (or update that name in `codemagic.yaml` to match whatever you chose).
+- [ ] Fill in the two placeholders in `codemagic.yaml`:
+  `bundle_identifier` and `APP_STORE_APPLE_ID` (see step 1 above).
+- [ ] In App Store Connect, create an **Internal Testers** TestFlight group
+      (or rename the `beta_groups` entry in `codemagic.yaml` to match a
+      group you already have) and add yourself to it with the Apple ID your
+      iPhone is signed into.
+- [ ] Start the `ios-testflight` workflow manually from the Codemagic
+      dashboard. Once it succeeds, the build shows up in the **TestFlight**
+      app on your iPhone within a few minutes (first build on a fresh Apple
+      ID/device sometimes needs the TestFlight invite email accepted first).
+- [ ] `codemagic.yaml` was written without being run against Codemagic's own
+      validator (no access to Codemagic from the coding session either) — if
+      the first build fails on a config error rather than a code error,
+      paste the error back and it'll get fixed.
+
+Android has no such gap: `flutter run` straight from a laptop onto a phone
+over USB works without any of this, since Google doesn't require a
+proprietary OS to build for its own platform.
+
+## 4. In-App Purchase products
 
 - [ ] In App Store Connect **and** Google Play Console, create the IAP
       products once `14-boutique.md` defines the catalog: consumable coin
@@ -55,22 +94,23 @@ ship at launch (see the root `README.md` architecture note).
       Access → Integrations → In-App Purchase) for server-side receipt
       validation. You'll get an Issuer ID, Key ID, and a `.p8` private key —
       put them in `backend/.env` as `APPLE_ISSUER_ID`, `APPLE_KEY_ID`,
-      `APPLE_IAP_PRIVATE_KEY`.
+      `APPLE_IAP_PRIVATE_KEY`. (Separate key from the App Store Connect API
+      key used for Codemagic in step 3 — different access scope.)
 - [ ] Generate a **Google Play Developer API** service account (Play
       Console → Users and permissions → API access) for server-side receipt
       validation on Android. The backend doesn't verify Google Play receipts
       yet — flagged as open work in `backend/README.md`.
 
-## 4. Beta testing
+## 5. Beta testing
 
-- [ ] **TestFlight** (iOS): internal testing group available immediately,
-      no Apple review needed; external testing invites up to 10,000 testers
-      via email or a public link.
+- [ ] **TestFlight** (iOS): covered by step 3 for internal testing; external
+      testing invites up to 10,000 testers via email or a public link once
+      you're ready for broader feedback.
 - [ ] **Play Console testing tracks** (Android): internal testing available
       immediately; closed/open testing tracks for broader feedback, each
       requiring a short review the first time.
 
-## 5. Railway (backend)
+## 6. Railway (backend)
 
 - [ ] Create a Railway project.
 - [ ] Add a **Postgres** plugin to it.
@@ -82,7 +122,7 @@ ship at launch (see the root `README.md` architecture note).
 - [ ] Once you have the live URL, update
       `mobile/lib/models/app_config.dart` → `apiBaseUrl`.
 
-## 6. Privacy policy
+## 7. Privacy policy
 
 - [ ] Publish `docs/PRIVACY_POLICY.md` (fill in the placeholders first)
       somewhere public — either:
@@ -92,11 +132,11 @@ ship at launch (see the root `README.md` architecture note).
       app has both IAP and user accounts (Play Console: Data safety section
       also needs filling in from the same policy).
 
-## 7. Store submission (once the app is ready)
+## 8. Store submission (once the app is ready)
 
 - [ ] **App Store Connect**: product page (screenshots, description, age
       rating, Privacy Nutrition Label), link the privacy policy URL from
-      step 6.
+      step 7.
 - [ ] **Google Play Console**: store listing (screenshots, description,
       content rating questionnaire, Data safety form), link the privacy
-      policy URL from step 6.
+      policy URL from step 7.

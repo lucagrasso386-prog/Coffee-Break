@@ -11,10 +11,11 @@ processed in order.
 ## Repo layout
 
 ```
-mobile/    — Flutter app, iOS + Android (see mobile/README.md)
-backend/   — Express/Prisma API, deployed on Railway (see backend/README.md)
-docs/      — setup checklist + privacy policy template
-images/    — unmodified final assets provided by the creator, spec by spec
+mobile/          — Flutter app, iOS + Android (see mobile/README.md)
+backend/         — Express/Prisma API, deployed on Railway (see backend/README.md)
+docs/            — setup checklist + privacy policy template
+images/          — unmodified final assets provided by the creator, spec by spec
+codemagic.yaml   — cloud iOS build + TestFlight publish (no Mac needed, see docs/SETUP.md step 3)
 ```
 
 **Architecture note**: `01-setup-projet-et-architecture.md` originally

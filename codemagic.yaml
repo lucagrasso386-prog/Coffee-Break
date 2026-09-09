@@ -1,0 +1,60 @@
+workflows:
+  ios-testflight:
+    name: Coffee Break — iOS TestFlight
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      # Name of the App Store Connect API key integration to create in
+      # Codemagic's UI (Teams > Integrations > App Store Connect). Nothing
+      # in this repo can create that integration for you -- it's tied to
+      # your Apple Developer account credentials. See docs/SETUP.md, step 1.
+      app_store_connect: coffee_break_asc_api_key
+    working_directory: mobile
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        # Replace once the real Bundle ID is registered in Apple Developer
+        # (docs/SETUP.md step 1) -- must match the App Store Connect app
+        # record exactly.
+        bundle_identifier: com.yourcompany.coffeebreak
+      vars:
+        # Numeric Apple ID of the App Store Connect app record (found in
+        # App Store Connect > App Information > Apple ID). Fill in once
+        # the app record exists.
+        APP_STORE_APPLE_ID: 0000000000
+    # No automatic trigger configured -- start builds manually from the
+    # Codemagic dashboard (any branch) until you've settled on a workflow
+    # for what should auto-build. Add a `triggering:` block once that's
+    # decided.
+    scripts:
+      - name: Generate the Flutter iOS platform project
+        script: |
+          # `flutter create` on an existing pubspec.yaml only fills in the
+          # missing platform folder (ios/) -- it never touches lib/,
+          # pubspec.yaml, or assets/. This repo doesn't commit ios/ for the
+          # same reason it never committed an .xcodeproj: no environment in
+          # the authoring loop can run Xcode to keep a committed copy in
+          # sync. Codemagic's Mac runner is the first place in this
+          # pipeline that actually can.
+          flutter create --platforms=ios --org com.yourcompany --project-name coffee_break .
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
+      - name: Build ipa
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - mobile/build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        # Rename/add groups to match whatever internal testing group you
+        # create in App Store Connect (docs/SETUP.md step 4).
+        beta_groups:
+          - Internal Testers
