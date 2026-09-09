@@ -481,7 +481,29 @@ stars for validated levels, matte for not) standing in for the metallic
 level buttons, and Material icons for the HUD row instead of the coin/
 heart/compass/cup/shop art. `lib/screens/progression_map_screen.dart` is
 built so re-skinning is mostly swapping what each placeholder paints,
-not restructuring the scroll logic itself.
+not restructuring the scroll logic itself. Since biome switching is
+deferred (see above), the transition bridge asset isn't needed for this
+pass either.
+
+The creator is planning to send more decor variety than just one of each
+piece (several palm trees, several flower clusters, ...), specifically so
+the path doesn't read as one motif copy-pasted down its whole length --
+placement is on me, not a fixed spot per piece. `lib/models/decor_variant.dart`
++ `lib/widgets/decor_scatter.dart` (`DecorScatter`) scatter a *pool* of
+variants along the path: every candidate slot along the drum
+independently rolls, seeded by its own index, whether anything sits there
+and which pool variant -- deterministic (stable across rebuilds, no
+re-rolling every frame) but not a repeating pattern, since neighboring
+slots roll independently. A separate, denser "landmark" placement (no
+roll, just fixed spacing) is for waypoints like the Coffee Bar building,
+which should read as a fixed marker rather than scattered filler. Decor
+pieces project through the same `CylinderProjection` as level nodes and
+get depth-sorted into the same draw order, so a close decor piece
+correctly overlaps a farther level button (or a farther decor piece) and
+vice versa. Both pools are still empty (`fillerPool: []`, `landmarkPool: []`
+in `_ProgressionMapScreenState`) -- registering a `DecorVariant` per asset
+once the creator sends them is the only wiring left; nothing else about
+the scatter or the scroll needs to change.
 
 Also worth knowing: per-level star history (1-3 stars per completed
 level) isn't tracked server-side yet -- `ProgressDTO` only carries a

@@ -3,10 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+import '../models/decor_variant.dart';
 import '../models/level_map_node.dart';
 import '../networking/api_client.dart';
 import '../widgets/coming_soon_screen.dart';
 import '../widgets/cylinder_projection.dart';
+import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
 
 /// 09-carte-progression.md: the level map. Real decor art (palm trees,
@@ -29,6 +31,15 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   static const double _anglePerLevel = 0.42;
   static const double _dragPixelsPerRadian = 220;
   static const CylinderProjection _projection = CylinderProjection();
+
+  /// Empty pools until the creator's decor art is in -- registering a
+  /// variant here is the only wiring `DecorScatter` needs to start
+  /// placing it (see mobile/README.md, 09-carte-progression.md section).
+  static const DecorScatter _decorScatter = DecorScatter(
+    fillerPool: [],
+    landmarkPool: [],
+    anglePerLevel: _anglePerLevel,
+  );
 
   late final AnimationController _flingController;
   double _rotation = 0;
@@ -134,9 +145,54 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
               centerX: width / 2 + zigzag,
             ));
           }
-          // Nearer (bigger) nodes must overlap farther ones.
-          final byDepth = [...visible]
-            ..sort((a, b) => a.point.scale.compareTo(b.point.scale));
+
+          final decorPieces = <_ProjectedDecor>[];
+          for (final d in _decorScatter.forRange(start * _anglePerLevel, end * _anglePerLevel)) {
+            final point =
+                _projection.project(angle: d.angle, rotation: _rotation, baseY: baseY);
+            if (!point.isVisible) continue;
+            decorPieces.add(_ProjectedDecor(
+              decor: d,
+              point: point,
+              centerX: width / 2 + d.side * width * 0.45 * point.scale,
+            ));
+          }
+
+          // Nearer (bigger) items -- nodes and decor alike -- must overlap
+          // farther ones, so both are depth-sorted together rather than
+          // decor simply sitting behind every level button.
+          final sceneItems = <_SceneItem>[
+            for (final v in visible)
+              _SceneItem(
+                scale: v.point.scale,
+                widget: Positioned(
+                  top: v.point.dy - 34 * v.point.scale,
+                  left: v.centerX - 34 * v.point.scale,
+                  child: Opacity(
+                    opacity: v.point.opacity,
+                    child: Transform.scale(
+                      scale: v.point.scale,
+                      child: _LevelNode(node: v.node, onTap: () => _openLevel(v.node)),
+                    ),
+                  ),
+                ),
+              ),
+            for (final d in decorPieces)
+              _SceneItem(
+                scale: d.point.scale,
+                widget: Positioned(
+                  top: d.point.dy - 60 * d.point.scale,
+                  left: d.centerX - 40 * d.point.scale,
+                  child: Opacity(
+                    opacity: d.point.opacity,
+                    child: Transform.scale(
+                      scale: d.point.scale,
+                      child: _DecorPiece(decor: d.decor.variant, flipped: d.decor.flipped),
+                    ),
+                  ),
+                ),
+              ),
+          ]..sort((a, b) => a.scale.compareTo(b.scale));
 
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -160,21 +216,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                   size: Size(width, height),
                   painter: _PathPainter(visible),
                 ),
-                for (final v in byDepth)
-                  Positioned(
-                    top: v.point.dy - 34 * v.point.scale,
-                    left: v.centerX - 34 * v.point.scale,
-                    child: Opacity(
-                      opacity: v.point.opacity,
-                      child: Transform.scale(
-                        scale: v.point.scale,
-                        child: _LevelNode(
-                          node: v.node,
-                          onTap: () => _openLevel(v.node),
-                        ),
-                      ),
-                    ),
-                  ),
+                for (final item in sceneItems) item.widget,
                 Positioned(
                   left: 16,
                   right: 16,
@@ -208,6 +250,27 @@ class _ProjectedNode {
   final LevelMapNode node;
   final CylinderPoint point;
   final double centerX;
+}
+
+class _ProjectedDecor {
+  const _ProjectedDecor({
+    required this.decor,
+    required this.point,
+    required this.centerX,
+  });
+
+  final ScatteredDecor decor;
+  final CylinderPoint point;
+  final double centerX;
+}
+
+/// A node or decor piece already positioned, paired with its scale so the
+/// two kinds can be depth-sorted together (see `sceneItems` in `build`).
+class _SceneItem {
+  const _SceneItem({required this.scale, required this.widget});
+
+  final double scale;
+  final Widget widget;
 }
 
 /// Placeholder for the sand path texture: a stroked line through the
@@ -303,6 +366,23 @@ class _LevelNode extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Renders one scattered decor piece. Since `DecorScatter`'s pools are
+/// empty until real art exists, this only ever runs once variants are
+/// registered -- nothing to see yet, but ready.
+class _DecorPiece extends StatelessWidget {
+  const _DecorPiece({required this.decor, required this.flipped});
+
+  final DecorVariant decor;
+  final bool flipped;
+
+  @override
+  Widget build(BuildContext context) {
+    final image = Image.asset(decor.assetName, width: 96 * decor.baseScale);
+    if (!flipped) return image;
+    return Transform.flip(flipX: true, child: image);
   }
 }
 
