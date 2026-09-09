@@ -169,31 +169,48 @@ vertical-stripes→column-clear and horizontal-stripes→row-clear per the
 common match-3 convention (matching this to the sprite most people expect);
 flag it if the creator intended the opposite.
 
-**Two corrections from the first pass, per creator review:**
+**Corrections from creator review, across multiple passes:**
 
-- **Vitrine en verre**: the source photo shows a donut placed inside the
-  glass case as an *example* of "an element enclosed in glass" — it's not
-  meant to be baked into the obstacle asset itself, since in-game any
-  element can be the one trapped inside. `obstacle-vitrine-verre.png` now
-  contains only the glass frame, with the donut's silhouette (and a
-  generous margin around it) cut out to full transparency, so it can be
-  composited over whichever element the level places underneath.
-- **Chantilly**: the source photo's soft drop shadow was being kept as if
-  it were part of the object. This one was genuinely hard — the shadow
-  blends continuously into the cream's own ambient-occlusion shading with
-  no clean color boundary between them (verified: no distance-from-background
-  threshold, at any value, cleanly separates the two, since the shadow's
-  density right at the contact point matches or exceeds the brightness of
-  real object surface elsewhere). A first attempt worked around this by
-  tapering the reliable upper silhouette down to close off the base without
+- **Vitrine en verre** — pass 1: the source photo shows a donut placed
+  inside the glass case as an *example* of "an element enclosed in glass,"
+  not meant to be baked into the obstacle asset itself, since in-game any
+  element can be the one trapped inside; fixed by cutting the donut's
+  silhouette out to full transparency, keeping the rest of the glass frame
+  solid. Pass 2 (creator wanted a genuinely glassy look instead of a solid
+  frame): `obstacle-vitrine-verre.png` is now just a thin outline tracing
+  the case's true outer silhouette (from the real photo edge, not an
+  invented line) plus the one real specular highlight streak from the
+  source photo's top-left corner — every other original "solid glass"
+  pixel, plus the whole interior, is transparent. The boundary between the
+  thin frame and the transparent interior is a very large gaussian falloff
+  (not a hard edge), and the frame itself sits at ~40% opacity so it reads
+  as translucent glass over whatever element/background is composited
+  underneath, rather than as an opaque ring.
+- **Chantilly** — pass 1: the source photo's soft drop shadow was being
+  kept as if it were part of the object. This one was genuinely hard — the
+  shadow blends continuously into the cream's own ambient-occlusion shading
+  with no clean color boundary between them (no distance-from-background
+  threshold, at any value, cleanly separates the two). A first attempt
+  tapered the reliable upper silhouette down to close off the base without
   reading the ambiguous pixels at all — technically shadow-free, but the
-  fabricated base didn't match the real photo and looked wrong. Fixed
-  properly using a different, real signal instead of color: the cream's
-  surface has visible fold/crease texture (local pixel variance) even where
-  pale, while the shadow is a smooth, textureless gradient. Tracing the
-  lowest row of genuine texture in each column recovers the object's actual
-  scalloped base contour from the real image data, rather than inventing
-  it — the current cutout is a true trace, not a reconstruction.
+  fabricated base didn't match the real photo. Pass 2 fixed the base
+  properly with a real signal instead of color: the cream's surface has
+  visible fold/crease texture (local pixel variance) even where pale, while
+  the shadow is a smooth, textureless gradient; tracing the lowest row of
+  genuine texture per column recovers the true scalloped base contour from
+  real image data instead of inventing it. Pass 3 (creator: shadow still
+  visible, edges dirty): the pass-2 texture trace, on its own, still let a
+  thin sliver of shadow through in the one region where the fold texture
+  signal is weakest (the lower-right flank), and per-column noise in that
+  trace produced small jagged notches along the edge. Fixed by combining
+  three signals instead of one -- a border-connected flood fill from the
+  background (correct almost everywhere except the shadow "shelf" it
+  also pulls in), clipped by the texture trace specifically in the base
+  region only (leaving the flood fill's own clean silhouette untouched on
+  the sides/top, where there's no shadow to begin with) -- with the texture
+  cutoff median-smoothed across columns so isolated noisy readings can't
+  notch the edge. The visible shadow patch is gone and the base now follows
+  the real scalloped fold line.
 
 ## Accounts (`01-setup-projet-et-architecture.md`)
 
