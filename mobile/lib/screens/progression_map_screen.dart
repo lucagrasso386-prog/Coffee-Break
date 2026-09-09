@@ -14,6 +14,7 @@ import '../widgets/coming_soon_screen.dart';
 import '../widgets/cylinder_projection.dart';
 import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
+import '../widgets/twinkle_field.dart';
 
 /// 09-carte-progression.md: the level map. Most decor art (palm trees,
 /// hibiscus, plumeria, the "Coffee Bar" building, clouds) isn't in yet --
@@ -57,12 +58,22 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   ui.Image? _grassPlain;
   ui.Image? _grassTuft;
   late final String _skyAsset;
+  late final DayNightPeriod _period;
 
   static const Map<DayNightPeriod, String> _skyByPeriod = {
     DayNightPeriod.day: 'assets/progression_map/sky_day.jpg',
     DayNightPeriod.goldenHour: 'assets/progression_map/sky_golden.jpg',
     DayNightPeriod.night: 'assets/progression_map/sky_night.jpg',
   };
+
+  // "Poussière d'étoiles visible" (spec) plus the creator's own moon/star
+  // twinkle sprites -- night sky only, so this only ever loads its assets
+  // once the sky is already the night variant.
+  static const List<String> _twinkleAssets = [
+    'assets/progression_map/twinkle_moon.png',
+    'assets/progression_map/twinkle_star_big.png',
+    'assets/progression_map/twinkle_star_small.png',
+  ];
 
   double get _minRotation => 0;
   double get _maxRotation => (_nodes.length - 1) * _anglePerLevel;
@@ -80,7 +91,8 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     super.initState();
     // Fixed once per screen instance, same reasoning as HomeScreen's own
     // background pick -- not re-evaluated on every rebuild.
-    _skyAsset = _skyByPeriod[DayNightSchedule.current()]!;
+    _period = DayNightSchedule.current();
+    _skyAsset = _skyByPeriod[_period]!;
     _flingController = AnimationController.unbounded(vsync: this)
       ..addListener(() {
         setState(() {
@@ -285,6 +297,14 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                 // Sky: fixed, never affected by the scroll -- per the spec,
                 // "jamais affecté par le mouvement."
                 Image.asset(_skyAsset, fit: BoxFit.cover),
+                if (_period == DayNightPeriod.night)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    height: height * 0.35,
+                    child: const TwinkleField(assets: _twinkleAssets),
+                  ),
                 // Ground: no horizon/hill art yet, so this is a plain
                 // horizontal cutoff rather than a shaped hillside -- a
                 // reasonable placeholder split, not a measured one.

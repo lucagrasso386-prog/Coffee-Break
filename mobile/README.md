@@ -552,6 +552,24 @@ wired there (see that section above). Three pieces of level-map decor
 (clouds, palm trees, hibiscus, plumeria, Coffee Bar) will need the same
 treatment once their art exists, per the creator.
 
+On top of the sky art itself, the creator sent a moon and two different
+star shapes to scatter across the night sky specifically -- "apparaît
+disparaît, aléatoirement dans le ciel en tout petit plein avec une
+lueurs autour." `lib/widgets/twinkle_field.dart` (`TwinkleField`) places
+several of each (cycled across a fixed, seeded scatter so positions and
+timing stay stable across rebuilds without lining up in an obvious
+pattern) inside `ProgressionMapScreen`, confined to the sky region and
+gated to `DayNightPeriod.night` only -- doesn't make sense against a
+bright day or golden-hour sky. Each one runs its own independent
+fade-in/hold/fade-out/hold-off loop (`TweenSequence`, randomized period
+and start delay) so they don't all pulse in sync, with a soft glow drawn
+as the same sprite tinted flat white and blurred behind the crisp one --
+matches the sprite's own silhouette rather than a generic circular
+bloom. The 3 sprites came in on a bright chroma-key background (pink,
+then the creator sent a cleaner purple one to actually use) -- a
+straightforward cutout by comparison to earlier ones in this file, no
+edge-hue issues this time.
+
 The HUD row, on the other hand, is fully real art now (`_HudButton`
 still supports a Material `icon` placeholder as a fallback, but nothing
 uses it here anymore): the coin and rewards cup turned out to already
