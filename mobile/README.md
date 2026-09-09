@@ -571,8 +571,18 @@ straightforward cutout by comparison to earlier ones in this file, no
 edge-hue issues this time.
 
 Clouds followed, now in day and golden-hour variants (two shapes each,
-cut from pink then cyan chroma-key sources -- no edge issues on either,
-per the creator "c'est pareil" for golden hour). Per the creator ("3 MAX
+cut from pink then cyan chroma-key sources, per the creator "c'est
+pareil" for golden hour). The creator later sent a replacement pair for
+the day shapes ("refait le jour avec eux") -- same pink chroma-key, but
+this time the cutout showed a thin magenta fringe along the edge: the
+source's anti-aliased boundary blends real cloud color with the pink
+background, so a pixel just inside the silhouette isn't pure cloud color
+even after erosion picks a clean interior seed. Fixed with edge color
+decontamination -- for any pixel with partial alpha, unmix it as
+`(pixel - (1-alpha)*background) / alpha` before writing it out, instead
+of keeping the source pixel's raw (background-tinted) color. Cheap
+enough to apply to every cutout going forward if the same fringe shows
+up again. Per the creator ("3 MAX
 change 1 jour sur deux y'en a deux et l'autre jour 3"), the count
 alternates daily between 2 and 3 rather than always showing the max --
 `lib/models/cloud_schedule.dart` (`CloudSchedule.countFor()`) keys this
