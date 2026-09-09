@@ -364,22 +364,52 @@ once there are screens to apply them to.
   packages, declared in `pubspec.yaml`); neither is wired to a UI yet — that
   starts with `08-page-accueil.md`.
 
-## Home screen (`08-page-accueil.md`) — in progress
+## Home screen (`08-page-accueil.md`)
 
-Status: **VALIDÉ** mockup, but the spec's appear sequence (background alone
-first, then the logo sliding in from the left at the same time the buttons
-slide in from the right) needs the background, logo, and buttons as
-independent layers, and the only asset provided so far is one flat merged
-mockup (`images/page-accueil.jpg`). Extracting a "clean" background from it
-would mean inventing pixels behind the logo/buttons that aren't in the real
-photo — against the standing "never invent" rule — so the background/logo
-slide-in animation and the actual screen widget are on hold until the
-creator supplies the background separately (confirmed: they're sourcing it;
-the decorative pastries scattered in the grass are meant to be part of
-whatever fixed background image arrives, not recomposited from the
+Status: **VALIDÉ**. The spec's appear sequence — background alone first
+while the app loads, then the logo sliding in from the left at the same
+time the buttons slide in from the right — needed the background, logo,
+and buttons as independent layers, but the only asset provided at first
+was one flat merged mockup (`images/page-accueil.jpg`). Extracting a
+"clean" background from it would have meant inventing pixels behind the
+logo/buttons that aren't in the real photo — against the standing "never
+invent" rule — so the screen waited until the creator supplied the
+background separately (`images/decor-page-accueil.jpg`, mirrored
+unmodified as always; confirmed: the decorative pastries scattered in the
+grass are part of that fixed background image, not recomposited from the
 individual `assets/game_elements/` sprites).
 
-What *doesn't* depend on that missing asset is done:
+- `assets/home/home_background.jpg` — the background, unmodified.
+- `assets/branding/logo_coffee_break.png` — the "Coffee Break" logo (heart,
+  wood sign, leaf, checkered ribbon), cut from `logo-coffee-break.jpg`.
+  Much simpler détourage than the buttons since the source sits on a flat
+  gradient sky rather than a textured, shadow-casting one -- the only
+  snag was the small checkered ribbon under "Break", whose blue squares
+  are close enough to sky-blue that a first pass classified them as
+  background too (a jagged bite out of the ribbon). Fixed by tightening
+  the blue/non-blue rule from a plain "blue-ish" threshold to how far blue
+  the pixel actually is (`B - R`): true sky sits far higher on that scale
+  than the ribbon's muted plaid, so a stricter cutoff keeps the whole
+  ribbon while still separating the logo cleanly from the sky everywhere
+  else.
+- `lib/screens/home_screen.dart` — `HomeScreen`. Background renders
+  immediately (the "loads first" beat happens for free -- Flutter builds
+  it in frame one while the logo/buttons start translated off-screen);
+  after a short delay, one `AnimationController` drives both the logo (from
+  the left) and the button column (from the right) into place together
+  via `SlideTransition`, easing out. Every position/size is a fraction of
+  the screen's own width/height (measured off the original mockup, which
+  is why the layered background needed to keep the same crop/aspect ratio
+  the mockup had) rather than a fixed pixel value, per the
+  screen-adaptability rule. "PLAY" ensures a local device id exists
+  (`DeviceIdentity.current()`) then navigates on; "SE CONNECTER" navigates
+  straight to a stand-in screen — neither the game board
+  (`11-ecran-de-jeu.md`) nor an account/sign-in screen exists yet, so both
+  buttons currently land on a minimal placeholder rather than something
+  invented ahead of its spec file.
+- `lib/main.dart` — now boots straight into `HomeScreen`.
+
+Earlier groundwork, still true:
 
 - `assets/ui/button_play.png`, `assets/ui/button_se_connecter.png` — the
   "PLAY" and "SE CONNECTER" pill buttons, cropped directly out of the
@@ -412,9 +442,4 @@ What *doesn't* depend on that missing asset is done:
   it at all.
 - `lib/widgets/home_action_buttons.dart` — `PlayButton` and `SignInButton`,
   each just the cropped art wrapped in `SpringButton` for the required
-  press/spring feedback. `onPressed` is left to the caller (load local
-  progress / open sign-in) since neither exists as a screen yet.
-
-Not started: the screen widget itself, the background-first-then-logo-and-
-buttons-slide-in animation, and wiring "PLAY" to local progress / "SE
-CONNECTER" to the account flow.
+  press/spring feedback.

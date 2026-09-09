@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'screens/home_screen.dart';
+
 void main() {
   runApp(const CoffeeBreakApp());
 }
@@ -12,11 +14,7 @@ class CoffeeBreakApp extends StatelessWidget {
     return MaterialApp(
       title: 'Coffee Break',
       debugShowCheckedModeBanner: false,
-      // Placeholder root screen — real screens start with
-      // 08-page-accueil.md. This just proves the app boots.
-      home: const Scaffold(
-        body: Center(child: Text('Coffee Break')),
-      ),
+      home: const HomeScreen(),
     );
   }
 }

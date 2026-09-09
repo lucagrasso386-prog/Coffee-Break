@@ -66,11 +66,10 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       permission request, needs a Firebase project — `docs/SETUP.md` step
       4). See `mobile/README.md` for what's genuinely wired up vs. still
       open (server-side push sending, mainly).
-- [ ] `08-page-accueil.md` — **in progress, blocked on an asset**: the
-      "PLAY"/"SE CONNECTER" buttons are cropped from the mockup and wired
-      with the press/spring feedback (`mobile/lib/widgets/home_action_buttons.dart`),
-      but the spec's background-then-logo-and-buttons slide-in animation
-      needs the background as its own layer, separate from the logo and
-      buttons baked into the one mockup provided so far — waiting on the
-      creator to supply that background (see `mobile/README.md`). `09`
-      onward not started yet.
+- [x] `08-page-accueil.md` — the home screen (`mobile/lib/screens/home_screen.dart`),
+      also the app's boot screen. Background appears first, then the logo
+      (from the left) and the "PLAY"/"SE CONNECTER" buttons (from the
+      right) slide in together. "PLAY" ensures a local device id exists
+      and "SE CONNECTER" opens a stand-in screen, since neither the game
+      board nor an account screen exists yet — see `mobile/README.md` for
+      details, including the logo's détourage. `09` onward not started yet.
