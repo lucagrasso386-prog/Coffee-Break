@@ -61,6 +61,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   late final String _skyAsset;
   late final DayNightPeriod _period;
   late final int _cloudCount;
+  late final List<String> _cloudAssets;
 
   static const Map<DayNightPeriod, String> _skyByPeriod = {
     DayNightPeriod.day: 'assets/progression_map/sky_day.jpg',
@@ -77,13 +78,22 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     'assets/progression_map/twinkle_star_small.png',
   ];
 
-  // Only a day variant exists so far -- golden hour/night reuse it rather
-  // than showing nothing, same fallback the sand path and grass used
-  // before their own dedicated variants arrived.
-  static const List<String> _cloudAssets = [
-    'assets/progression_map/cloud_1_day.png',
-    'assets/progression_map/cloud_2_day.png',
-  ];
+  // No night variant yet -- falls back to day, same as the sand path and
+  // grass did before their own night textures arrived.
+  static const Map<DayNightPeriod, List<String>> _cloudAssetsByPeriod = {
+    DayNightPeriod.day: [
+      'assets/progression_map/cloud_1_day.png',
+      'assets/progression_map/cloud_2_day.png',
+    ],
+    DayNightPeriod.goldenHour: [
+      'assets/progression_map/cloud_1_golden.png',
+      'assets/progression_map/cloud_2_golden.png',
+    ],
+    DayNightPeriod.night: [
+      'assets/progression_map/cloud_1_day.png',
+      'assets/progression_map/cloud_2_day.png',
+    ],
+  };
 
   // 3 fixed positions (fraction of the sky area) rather than a random
   // scatter -- there are only ever 2 or 3 clouds on screen, few enough
@@ -114,6 +124,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     _period = DayNightSchedule.current();
     _skyAsset = _skyByPeriod[_period]!;
     _cloudCount = CloudSchedule.countFor();
+    _cloudAssets = _cloudAssetsByPeriod[_period]!;
     _flingController = AnimationController.unbounded(vsync: this)
       ..addListener(() {
         setState(() {

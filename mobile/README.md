@@ -570,10 +570,11 @@ then the creator sent a cleaner purple one to actually use) -- a
 straightforward cutout by comparison to earlier ones in this file, no
 edge-hue issues this time.
 
-Clouds (day only) followed: two shapes, cut from a similar pink
-chroma-key source, no edge issues either. Per the creator ("3 MAX change
-1 jour sur deux y'en a deux et l'autre jour 3"), the count alternates
-daily between 2 and 3 rather than always showing the max --
+Clouds followed, now in day and golden-hour variants (two shapes each,
+cut from pink then cyan chroma-key sources -- no edge issues on either,
+per the creator "c'est pareil" for golden hour). Per the creator ("3 MAX
+change 1 jour sur deux y'en a deux et l'autre jour 3"), the count
+alternates daily between 2 and 3 rather than always showing the max --
 `lib/models/cloud_schedule.dart` (`CloudSchedule.countFor()`) keys this
 off a continuous day count (days since the epoch, not `DateTime.day`'s
 calendar-day-of-month) so the alternation doesn't hiccup at month
@@ -581,9 +582,9 @@ boundaries. Unlike the twinkle field, clouds sit at 3 fixed positions
 (`_cloudSlots` in `progression_map_screen.dart`) rather than a random
 scatter -- with only 2-3 on screen, a deliberate placement reads better
 than a seeded-random one; today's count just picks how many of those
-fixed slots render, cycling through the 2 shapes by index. Golden-hour
-and night reuse the day art for now, same fallback the sand path and
-grass used before their own variants arrived.
+fixed slots render, cycling through the period's 2 shapes by index.
+Night still reuses the day art, same fallback the sand path and grass
+used before their own night variants arrived.
 
 The HUD row, on the other hand, is fully real art now (`_HudButton`
 still supports a Material `icon` placeholder as a fallback, but nothing
