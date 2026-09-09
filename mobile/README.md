@@ -636,18 +636,38 @@ used before its own night variant arrived) would misrepresent that once
 real night art lands -- better an honest placeholder than a wrong
 "final" look.
 
-This cutout hit a new failure mode the others hadn't: unlike a flat
-render, these buttons have a shiny metal bezel that's genuinely
+This cutout hit two new failure modes the others hadn't. First: unlike a
+flat render, these buttons have a shiny metal bezel that's genuinely
 reflective in the source photo, so it picked up green spill from the
 chroma-key background baked into fully-opaque interior pixels (not just
 a soft edge blend at the alpha boundary, like every earlier cutout's
-issue). Edge decontamination alone doesn't touch that -- it only
-touches partial-alpha pixels. Fixed with a proper despill pass: any
-pixel where green measurably exceeds the red/blue midpoint gets pulled
-down to that midpoint. Applied to blue, purple, and pink (safe, since
-none of those are ever meant to look green); skipped for the teal
-button, since its whole point is being green-dominant and despilling it
-would have eaten its real color along with the spill.
+issue). Fixed with a despill pass: any pixel where green measurably
+exceeds the red/blue midpoint gets pulled down to that midpoint,
+applied to blue, purple, and pink (safe, since none of those are ever
+meant to look green) and skipped for the teal button, since its whole
+point is being green-dominant.
+
+Second, worse one -- caught by the creator after the first push ("ya un
+probleme avec le violet et le vert en haut"): the *lit* renders have a
+real soft glow bleeding gradually into the green backdrop over ~20-25px
+above each button, not a crisp cutout edge (confirmed by sampling a
+vertical profile through the purple button: distance from pure
+background climbed smoothly over about 25 rows before the solid bezel
+started). The original binary-threshold-plus-narrow-erosion approach
+(built for crisp-edged sprites, reused as-is here) misread most of that
+gradual band as fully-opaque "core" and baked in the half-background
+color -- which then either showed through as a wrong hue outright, or,
+on top of that, got its green forced flat by the *first* fix's
+unconditional despill, turning a soft green glow into a false gray-blue
+band. Fixed by computing alpha directly from color distance to the
+background (a smoothstep between two distance thresholds) instead of a
+binary mask -- this reproduces the render's actual gradual falloff
+rather than fighting it -- and by scaling despill strength with that
+same alpha so it can no longer flatten a mostly-background pixel into a
+wrong color. Worth remembering for any future glowing/bloomed cutout in
+this file: a soft light effect painted into a chroma-key composite
+needs alpha derived from the real color gradient, not a hard silhouette
+with a thin feather bolted on.
 
 The creator is planning to send more decor variety than just one of each
 piece (several palm trees, several flower clusters, ...), specifically so
