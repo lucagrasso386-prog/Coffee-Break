@@ -209,8 +209,21 @@ flag it if the creator intended the opposite.
   region only (leaving the flood fill's own clean silhouette untouched on
   the sides/top, where there's no shadow to begin with) -- with the texture
   cutoff median-smoothed across columns so isolated noisy readings can't
-  notch the edge. The visible shadow patch is gone and the base now follows
-  the real scalloped fold line.
+  notch the edge. Pass 4 (creator: a big chunk of the cream itself is now
+  missing): the pass-3 border-connected flood fill, while good at excluding
+  the shadow, also silently ate into a real but very pale/low-contrast fold
+  on the object's left side -- pixels close enough to background-white in
+  raw color that the flood fill crossed right through them from the border,
+  since color-distance alone can't tell "pale object" from "background"
+  there. Replaced the whole silhouette method with Sobel gradient-magnitude
+  edge detection instead of color distance: even a very pale fold still has
+  a real (if faint) brightness *edge* against the background, so tracing
+  that edge (closing small gaps, then filling the closed contour) recovers
+  the true full silhouette -- pale lobe included -- while still correctly
+  excluding the shadow, since the shadow's own boundary is a smooth gradient
+  with no comparable edge to trace. This is now a strictly better signal
+  than both the plain color-distance and local-texture approaches tried in
+  earlier passes.
 
 ## Accounts (`01-setup-projet-et-architecture.md`)
 
