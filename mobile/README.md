@@ -540,7 +540,11 @@ the path and the grass, it's a single full-bleed `Image.asset` rather
 than a tiled `ImageShader` (nothing to repeat; it just fills the screen
 once), picked the same way `HomeScreen` picks its own background: once
 per screen instance in `initState` via `DayNightSchedule.current()`, not
-re-evaluated on every rebuild. It first came up when asking about the
+re-evaluated on every rebuild. The night sky has a persistent aurora
+borealis baked into the art itself (the creator's own touch, beyond what
+`09-carte-progression.md`'s "poussière d'étoiles visible" describes) --
+just part of that one image, nothing extra to wire up for it. It first
+came up when asking about the
 sky: the creator mentioned the day/night cycle applies to
 `08-page-accueil.md`'s background too, not just this screen -- already
 wired there (see that section above). Three pieces of level-map decor
