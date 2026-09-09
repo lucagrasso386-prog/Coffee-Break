@@ -364,6 +364,48 @@ once there are screens to apply them to.
   packages, declared in `pubspec.yaml`); neither is wired to a UI yet — that
   starts with `08-page-accueil.md`.
 
-Feature screens aren't built yet — those start with `08-page-accueil.md`
-onward, per the numbered spec order. Boost powers (`06-pouvoirs-des-bonus.md`)
-aren't implemented yet either.
+## Home screen (`08-page-accueil.md`) — in progress
+
+Status: **VALIDÉ** mockup, but the spec's appear sequence (background alone
+first, then the logo sliding in from the left at the same time the buttons
+slide in from the right) needs the background, logo, and buttons as
+independent layers, and the only asset provided so far is one flat merged
+mockup (`images/page-accueil.jpg`). Extracting a "clean" background from it
+would mean inventing pixels behind the logo/buttons that aren't in the real
+photo — against the standing "never invent" rule — so the background/logo
+slide-in animation and the actual screen widget are on hold until the
+creator supplies the background separately (confirmed: they're sourcing it;
+the decorative pastries scattered in the grass are meant to be part of
+whatever fixed background image arrives, not recomposited from the
+individual `assets/game_elements/` sprites).
+
+What *doesn't* depend on that missing asset is done:
+
+- `assets/ui/button_play.png`, `assets/ui/button_se_connecter.png` — the
+  "PLAY" and "SE CONNECTER" pill buttons, cropped directly out of the
+  mockup at their native resolution (confirmed: crop from the mockup rather
+  than rebuild in code, to keep the exact painted bevel/highlight/gradient).
+  The crop was harder than a normal détourage because the pills sit on the
+  dirt path, not a flat background: both buttons cast a soft shadow onto
+  the path in the ~20px gap between them, and that cast shadow shares
+  enough of the pill's own pink/salmon hue that plain background-color-
+  distance thresholding pulled the shadow in as part of the shape (and, on
+  one attempt, bridged the two buttons into a single connected blob).
+  Fixed by finding the row where each button's own color ramps sharply back
+  up to full brightness (the true edge) versus where it's still just the
+  ambient shadow gradually fading back to bare dirt, and cropping the
+  source region at that row instead of at a fixed margin — no color
+  threshold ever has to touch the shadow pixels at all. A second pass
+  tightened "se connecter"'s crop on the right, where a bush's own cast
+  shadow on the path was similarly close enough in hue to bridge in as a
+  stray blob. Both are saved with the ambient path shadow deliberately
+  excluded, since a reusable UI sprite shouldn't carry a shadow baked in
+  from one specific background.
+- `lib/widgets/home_action_buttons.dart` — `PlayButton` and `SignInButton`,
+  each just the cropped art wrapped in `SpringButton` for the required
+  press/spring feedback. `onPressed` is left to the caller (load local
+  progress / open sign-in) since neither exists as a screen yet.
+
+Not started: the screen widget itself, the background-first-then-logo-and-
+buttons-slide-in animation, and wiring "PLAY" to local progress / "SE
+CONNECTER" to the account flow.

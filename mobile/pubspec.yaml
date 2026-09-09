@@ -45,6 +45,7 @@ flutter:
     - assets/delivery_objectives/
     - assets/branding/
     - assets/loading_backgrounds/
+    - assets/ui/
 
 flutter_launcher_icons:
   image_path: "assets/icon/icon-1024.png"
