@@ -223,7 +223,18 @@ flag it if the creator intended the opposite.
   excluding the shadow, since the shadow's own boundary is a smooth gradient
   with no comparable edge to trace. This is now a strictly better signal
   than both the plain color-distance and local-texture approaches tried in
-  earlier passes.
+  earlier passes. Pass 5: the creator then supplied a new source photo of
+  the same object on a flat magenta backdrop
+  (`images/objectif-livraison-chantilly-v2-fondrose.jpg`), which sidesteps
+  the white-on-white ambiguity entirely -- extracted via plain color-distance
+  thresholding instead, since a saturated, unique background color has a
+  clean separation from the pale cream with no shadow-blending problem to
+  work around. One real fix needed here: pixels within a few pixels of the
+  edge carry JPEG chroma-subsampling bleed from the magenta background
+  (visible as a thin magenta fringe if left in), so the mask is eroded a
+  few pixels past that contaminated band rather than trying to recover it,
+  before a tight 1px feather + background-color unmix on the new, clean
+  boundary.
 
 ## Accounts (`01-setup-projet-et-architecture.md`)
 
