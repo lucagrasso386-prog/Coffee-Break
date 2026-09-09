@@ -478,12 +478,19 @@ of having them cropped out of the composites. Until then, the screen
 renders on placeholders: a flat sky-blue gradient, a painted line
 standing in for the sand path, plain colored circles (with a glow + gold
 stars for validated levels, matte for not) standing in for the metallic
-level buttons, and Material icons for the HUD row instead of the coin/
-heart/compass/cup/shop art. `lib/screens/progression_map_screen.dart` is
-built so re-skinning is mostly swapping what each placeholder paints,
-not restructuring the scroll logic itself. Since biome switching is
-deferred (see above), the transition bridge asset isn't needed for this
-pass either.
+level buttons, and Material icons for most of the HUD row.
+`lib/screens/progression_map_screen.dart` is built so re-skinning is
+mostly swapping what each placeholder paints, not restructuring the
+scroll logic itself. Since biome switching is deferred (see above), the
+transition bridge asset isn't needed for this pass either.
+
+Two HUD icons turned out to already exist, reused as-is rather than
+waiting on new ones: the coin (`Currency.coinCafe`, same as
+`03-assets-de-jeu.md`'s currency) and the rewards cup (the "café latte"
+boost art, confirmed by the creator to be the same cup). `_HudButton`
+takes either a Material `icon` placeholder or a real `imageAsset`, so
+swapping in the remaining HUD art later (heart, compass, shop) is a
+one-line change each, same as the decor pools above.
 
 The creator is planning to send more decor variety than just one of each
 piece (several palm trees, several flower clusters, ...), specifically so

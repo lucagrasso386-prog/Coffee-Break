@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+import '../models/currency.dart';
 import '../models/decor_variant.dart';
 import '../models/level_map_node.dart';
 import '../networking/api_client.dart';
@@ -412,14 +413,26 @@ class _Hud extends StatelessWidget {
         Expanded(
           child: _HudPill(children: [
             _HudButton(icon: Icons.favorite, color: Colors.pinkAccent, label: lives?.toString(), onTap: onLives),
-            _HudButton(icon: Icons.monetization_on, color: const Color(0xFFE7B93B), label: coins?.toString(), onTap: onCoins),
+            // Same coin as 03-assets-de-jeu.md's currency -- already exists.
+            _HudButton(
+              imageAsset: Currency.coinCafe.assetName,
+              color: const Color(0xFFE7B93B),
+              label: coins?.toString(),
+              onTap: onCoins,
+            ),
           ]),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: _HudPill(children: [
             _HudButton(icon: Icons.explore, color: const Color(0xFFC9A15A), onTap: onMap),
-            _HudButton(icon: Icons.local_cafe, color: const Color(0xFF8A5A3B), onTap: onRewards),
+            // Same café-latte cup as the "café latte" boost -- the
+            // creator confirmed it's the rewards icon too, no new asset.
+            _HudButton(
+              imageAsset: 'assets/boosts/boost-cafe-latte.png',
+              color: const Color(0xFF8A5A3B),
+              onTap: onRewards,
+            ),
             _HudButton(icon: Icons.storefront, color: const Color(0xFF3FA796), onTap: onShop),
           ]),
         ),
@@ -452,13 +465,20 @@ class _HudPill extends StatelessWidget {
 
 class _HudButton extends StatelessWidget {
   const _HudButton({
-    required this.icon,
+    this.icon,
+    this.imageAsset,
     required this.color,
     required this.onTap,
     this.label,
-  });
+  }) : assert(icon != null || imageAsset != null, 'need an icon or an image');
 
-  final IconData icon;
+  /// Placeholder for whichever HUD icons don't have real art yet.
+  final IconData? icon;
+
+  /// Real art, when it already exists (e.g. an asset shared with another
+  /// screen) -- takes priority over [icon] when both are set.
+  final String? imageAsset;
+
   final Color color;
   final VoidCallback onTap;
   final String? label;
@@ -470,7 +490,15 @@ class _HudButton extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(radius: 18, backgroundColor: color, child: Icon(icon, color: Colors.white, size: 18)),
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: color,
+            child: imageAsset != null
+                ? ClipOval(
+                    child: Image.asset(imageAsset!, width: 36, height: 36, fit: BoxFit.cover),
+                  )
+                : Icon(icon, color: Colors.white, size: 18),
+          ),
           if (label != null) ...[
             const SizedBox(height: 2),
             Text(label!, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
