@@ -95,7 +95,37 @@ Android has no such gap: `flutter run` straight from a laptop onto a phone
 over USB works without any of this, since Google doesn't require a
 proprietary OS to build for its own platform.
 
-## 4. In-App Purchase products
+## 4. Firebase (push notifications)
+
+`07-regles-globales-ui.md` requires prompting the player to allow push
+notifications. The client side (`mobile/lib/services/notification_service.dart`)
+is already written against `firebase_messaging`, which needs a real Firebase
+project:
+
+- [ ] Create a Firebase project (or reuse an existing one) at
+      [console.firebase.google.com](https://console.firebase.google.com/).
+- [ ] Add an iOS app to it using the Bundle ID from step 1, download the
+      generated `GoogleService-Info.plist`, and add it to
+      `mobile/ios/Runner` once that folder exists (after `flutter create .`,
+      see `mobile/README.md`).
+- [ ] Add an Android app to it using the Application ID from step 2,
+      download `google-services.json`, and add it to `mobile/android/app`
+      once that folder exists.
+- [ ] Upload your Apple Push Notification key (Apple Developer → Keys →
+      create one with the **Apple Push Notifications service** capability)
+      to Firebase project settings → Cloud Messaging → APNs Authentication
+      Key, so Firebase can actually deliver to iOS devices.
+- [ ] Call `Firebase.initializeApp()` at the top of `main()` once both
+      config files above are in place — deliberately not wired up yet
+      (see the doc comment on `notification_service.dart`), since doing so
+      without them would crash the app on startup instead of just no-op-ing.
+- [ ] Still open, not part of this step: server-side sending (Firebase
+      Admin SDK in the backend, storing each user's push token, and
+      something that actually decides when to send — e.g. on the lives-refill
+      timer in `backend/src/lib/lives.ts`). Flagged as deferred work, not
+      started.
+
+## 5. In-App Purchase products
 
 - [ ] In App Store Connect **and** Google Play Console, create the IAP
       products once `14-boutique.md` defines the catalog: consumable coin
@@ -119,7 +149,7 @@ proprietary OS to build for its own platform.
       validation on Android. The backend doesn't verify Google Play receipts
       yet — flagged as open work in `backend/README.md`.
 
-## 5. Beta testing
+## 6. Beta testing
 
 - [ ] **TestFlight** (iOS): covered by step 3 for internal testing; external
       testing invites up to 10,000 testers via email or a public link once
@@ -128,7 +158,7 @@ proprietary OS to build for its own platform.
       immediately; closed/open testing tracks for broader feedback, each
       requiring a short review the first time.
 
-## 6. Railway (backend)
+## 7. Railway (backend)
 
 - [ ] Create a Railway project.
 - [ ] Add a **Postgres** plugin to it.
@@ -140,7 +170,7 @@ proprietary OS to build for its own platform.
 - [ ] Once you have the live URL, update
       `mobile/lib/models/app_config.dart` → `apiBaseUrl`.
 
-## 7. Privacy policy
+## 8. Privacy policy
 
 - [ ] Publish `docs/PRIVACY_POLICY.md` (fill in the placeholders first)
       somewhere public — either:
@@ -150,11 +180,11 @@ proprietary OS to build for its own platform.
       app has both IAP and user accounts (Play Console: Data safety section
       also needs filling in from the same policy).
 
-## 8. Store submission (once the app is ready)
+## 9. Store submission (once the app is ready)
 
 - [ ] **App Store Connect**: product page (screenshots, description, age
       rating, Privacy Nutrition Label), link the privacy policy URL from
-      step 7.
+      step 8.
 - [ ] **Google Play Console**: store listing (screenshots, description,
       content rating questionnaire, Data safety form), link the privacy
-      policy URL from step 7.
+      policy URL from step 8.

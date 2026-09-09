@@ -58,4 +58,12 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       for each of the 5 boosts, plus the 5-boost mission-sheet loadout cap,
       as static data (`mobile/lib/models/boost_power.dart`). No new assets;
       actually running the effects is still `11-ecran-de-jeu.md`.
-- [ ] `07-*.md` onward — not started yet.
+- [x] `07-regles-globales-ui.md` — reusable pieces for the game-wide rules:
+      `SpringButton` (press/spring animation), `HapticsService` (the 7 named
+      haptic triggers), `SoundService` (stub, no audio assets yet),
+      `LoadingTransitionOverlay` + the 8 loading backgrounds (with the
+      requested center seam line added), and `NotificationService` (push
+      permission request, needs a Firebase project — `docs/SETUP.md` step
+      4). See `mobile/README.md` for what's genuinely wired up vs. still
+      open (server-side push sending, mainly).
+- [ ] `08-page-accueil.md` onward — not started yet.

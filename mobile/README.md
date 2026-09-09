@@ -303,6 +303,57 @@ flag it if the creator intended the opposite.
 - No new assets — this file is pure behavior, reusing the boost sprites
   already wired in `03-assets-de-jeu.md`.
 
+## Global UI rules (`07-regles-globales-ui.md`)
+
+These apply across every future screen, not to one feature -- some are
+buildable now as reusable pieces, some are just documented rules to follow
+once there are screens to apply them to.
+
+- **Screen adaptability**: no fixed-size canvas anywhere, ever -- build
+  every screen with `MediaQuery`/`LayoutBuilder`/`Flexible`/`Expanded`/
+  `SafeArea` so it fills the real device exactly, no black bars or empty
+  space. Reference/test device is the iPhone 17 Pro, but nothing should be
+  hardcoded to its exact dimensions. This is a rule for `08-page-accueil.md`
+  onward, not something with its own file to point to.
+- `lib/widgets/spring_button.dart` — `SpringButton`, a press-and-spring-back
+  wrapper every tappable control in the game should use ("tous les boutons
+  du jeu, sans exception"). Scales down on press, overshoots slightly past
+  full size on release before settling -- a real elastic curve, not just a
+  linear snap-back.
+- `lib/services/haptics_service.dart` — `HapticsService`, one named method
+  per haptic trigger the spec lists (match success, special piece effect,
+  the moves-to-stars animation, releasing a "Jouer" button, releasing a
+  level "buzzer", the star reveal, tapping the nav bar). Built on Flutter's
+  own `HapticFeedback`, so no extra platform setup needed.
+- `lib/services/sound_service.dart` — `SoundService.play(SoundEffect)`, a
+  stub (logs in debug, otherwise no-op) for the "every button and animation
+  needs a sound" rule. No audio files exist yet and no music is planned for
+  now (per the same spec file) -- this exists so call sites can be wired up
+  ahead of the actual assets, and only the stub's body needs to change once
+  they exist.
+- `lib/widgets/loading_transition_overlay.dart` — `LoadingTransitionOverlay`,
+  the inter-screen loading animation (splits into top/bottom halves that
+  slide together from off-screen to appear, and back apart to dismiss),
+  capped at 2 seconds on screen total. Explicitly **not** for the very
+  first loading screen at app launch (`08-page-accueil.md`'s job).
+  `assets/loading_backgrounds/` holds the 8 background variants -- each
+  one had a thin darker horizontal line added at its vertical center
+  (sampled from that image's own background color, not an invented tint)
+  since the source photos didn't have one; the spec's own dev note asks
+  for this so the panel reads as hinged/opening in its middle rather than
+  as one flat image cut in half. Not wired into any navigation yet since
+  there's no screen to navigate *to* until `08-page-accueil.md` onward
+  exist.
+- `lib/services/notification_service.dart` — `NotificationService`, push
+  permission request + token retrieval via `firebase_messaging`. Needs a
+  real Firebase project (`google-services.json` / `GoogleService-Info.plist`)
+  that doesn't exist yet, see `docs/SETUP.md` step 4 -- `Firebase.initializeApp()`
+  is deliberately not called from `main.dart` yet, since doing so without
+  those config files would crash the app on startup. Sending an actual
+  notification (e.g. when lives refill) needs the Firebase Admin SDK
+  server-side plus somewhere to store each user's token, neither of which
+  exist -- flagged as open work, not built.
+
 ## Accounts (`01-setup-projet-et-architecture.md`)
 
 - `lib/models/device_identity.dart` — device-local account id, wiped on
