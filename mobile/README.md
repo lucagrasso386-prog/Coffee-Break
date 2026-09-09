@@ -710,6 +710,22 @@ in `_ProgressionMapScreenState`) -- registering a `DecorVariant` per asset
 once the creator sends them is the only wiring left; nothing else about
 the scatter or the scroll needs to change.
 
+Every node and decor piece also casts a contact shadow now -- the
+creator asked directly how the scroll would actually read as "resting
+on a curved surface" rather than flat stickers pasted over it.
+`_contactShadow` in `progression_map_screen.dart` draws a soft ellipse
+at each item's foot using the *same* projected `point` (scale +
+opacity) the item itself was drawn with, so the shadow shrinks and
+fades in lockstep as the item rolls away over the drum instead of
+sitting at a fixed size underneath it. It's a flat radial gradient, not
+an actual blurred one -- close enough visually at this size, and
+avoids stacking an `ImageFiltered` blur on top of a dozen-plus items
+that can be on screen at once. Each shadow shares its owner's
+depth-sort scale (nudged a hair lower so it's guaranteed to land
+immediately behind, since `List.sort` isn't stable on ties) rather than
+getting sorted independently, so it can't end up drawn in front of a
+nearer item or behind a farther one it has nothing to do with.
+
 Also worth knowing: per-level star history (1-3 stars per completed
 level) isn't tracked server-side yet -- `ProgressDTO` only carries a
 single `unlockedLevel` -- so every validated level currently shows a

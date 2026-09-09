@@ -41,6 +41,10 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   static const double _dragPixelsPerRadian = 220;
   static const CylinderProjection _projection = CylinderProjection();
 
+  // See the `sceneItems` comment in build(): keeps a shadow's sort key
+  // just under its owner's so it always draws immediately behind it.
+  static const double _shadowSortEpsilon = 0.0001;
+
   /// Empty pools until the creator's decor art is in -- registering a
   /// variant here is the only wiring `DecorScatter` needs to start
   /// placing it (see mobile/README.md, 09-carte-progression.md section).
@@ -240,6 +244,43 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
         .push(MaterialPageRoute(builder: (_) => ComingSoonScreen(message: message)));
   }
 
+  /// A soft ellipse at an item's foot -- the cheap trick that sells
+  /// "resting on the curved surface" rather than "pasted on top of it".
+  /// Uses the same `point` (scale + opacity) the item itself was
+  /// projected with, so the shadow shrinks and fades in lockstep as the
+  /// item rolls away over the drum, instead of floating at a fixed size.
+  /// A flat radial gradient stands in for a blurred one -- visually close
+  /// enough at this size, and cheap even with a dozen-plus on screen at
+  /// once (an `ImageFiltered` blur per shadow would add up).
+  Widget _contactShadow({
+    required CylinderPoint point,
+    required double centerX,
+    required double footY,
+    required double baseWidth,
+  }) {
+    final width = baseWidth * point.scale;
+    final height = width * 0.32;
+    return Positioned(
+      top: footY - height / 2,
+      left: centerX - width / 2,
+      child: IgnorePointer(
+        child: Opacity(
+          opacity: point.opacity * 0.55,
+          child: Container(
+            width: width,
+            height: height,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(999)),
+              gradient: RadialGradient(
+                colors: [Colors.black54, Colors.transparent],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,8 +324,25 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
           // Nearer (bigger) items -- nodes and decor alike -- must overlap
           // farther ones, so both are depth-sorted together rather than
           // decor simply sitting behind every level button.
+          //
+          // Each item also gets a contact shadow: a soft ellipse at its
+          // foot, shrinking/fading with the exact same `point` the item
+          // itself uses, so it tracks the curve instead of just floating
+          // underneath. Its sort key is nudged a hair below the item's own
+          // scale so it always lands immediately behind its owner --
+          // `List.sort` isn't guaranteed stable, so equal keys could
+          // otherwise land in either order.
           final sceneItems = <_SceneItem>[
-            for (final v in visible)
+            for (final v in visible) ...[
+              _SceneItem(
+                scale: v.point.scale - _shadowSortEpsilon,
+                widget: _contactShadow(
+                  point: v.point,
+                  centerX: v.centerX,
+                  footY: v.point.dy + 34 * v.point.scale,
+                  baseWidth: 54,
+                ),
+              ),
               _SceneItem(
                 scale: v.point.scale,
                 widget: Positioned(
@@ -303,7 +361,17 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                   ),
                 ),
               ),
-            for (final d in decorPieces)
+            ],
+            for (final d in decorPieces) ...[
+              _SceneItem(
+                scale: d.point.scale - _shadowSortEpsilon,
+                widget: _contactShadow(
+                  point: d.point,
+                  centerX: d.centerX,
+                  footY: d.point.dy + 60 * d.point.scale,
+                  baseWidth: 70,
+                ),
+              ),
               _SceneItem(
                 scale: d.point.scale,
                 widget: Positioned(
@@ -318,6 +386,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                   ),
                 ),
               ),
+            ],
           ]..sort((a, b) => a.scale.compareTo(b.scale));
 
           return GestureDetector(
