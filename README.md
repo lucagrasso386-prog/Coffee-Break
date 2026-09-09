@@ -72,4 +72,16 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       right) slide in together. "PLAY" ensures a local device id exists
       and "SE CONNECTER" opens a stand-in screen, since neither the game
       board nor an account screen exists yet — see `mobile/README.md` for
-      details, including the logo's détourage. `09` onward not started yet.
+      details, including the logo's détourage.
+- [ ] `09-carte-progression.md` — **core in, decor pending**: the level
+      map's real 3D-perspective scroll engine (a level's angle on an
+      invisible drum projected against the current rotation —
+      `mobile/lib/widgets/cylinder_projection.dart`), level button states,
+      and HUD are built and wired from "PLAY"
+      (`mobile/lib/screens/progression_map_screen.dart`), but running on
+      placeholder shapes (no real art yet — the creator is sending
+      individual decor elements rather than having them cropped from the
+      two merged mockups). Day/night cycle, the biome swap every 10
+      levels, and infinite level generation past the first 1000 preloaded
+      are explicitly deferred. See `mobile/README.md` for details. `10`
+      onward not started yet.

@@ -443,3 +443,60 @@ Earlier groundwork, still true:
 - `lib/widgets/home_action_buttons.dart` — `PlayButton` and `SignInButton`,
   each just the cropped art wrapped in `SpringButton` for the required
   press/spring feedback.
+
+## Progression map (`09-carte-progression.md`) — core in, decor pending
+
+Status: **concept validé**. This is the level map: a zigzagging path of
+round level buttons scrolling over a curved surface. The spec's own
+technical section assumed native iOS (SceneKit, a cylinder mesh) --
+obsolete since the Flutter pivot -- and offers a simpler 2D/parallax
+fallback for V1, but the creator asked for the real 3D curvature now
+rather than the fallback. Built without any 3D engine dependency: each
+level (and eventually each decor piece) sits at a fixed angle on an
+invisible drum whose axis points at the camera; scrolling changes a
+`rotation` value, and projecting angle-against-rotation each frame
+(`lib/widgets/cylinder_projection.dart`, `CylinderProjection.project`)
+gives that item's screen position, scale, and opacity -- genuine
+perspective math, applied to ordinary `Positioned`/`Transform` widgets.
+Fling gestures hand off to a `FrictionSimulation` for momentum. The exact
+curve (how tight, how fast) is tuned by reasoned constants, not by eye --
+this environment has no way to run the app on a device, so expect to
+adjust `CylinderProjection`'s `radius`/`focalLength` once someone can
+actually watch it scroll.
+
+Per the creator's explicit split, three sizable systems are deferred
+entirely (flagged in code comments, not attempted): the day/night cycle,
+the biome change every 10 levels, and true infinite level generation.
+`LevelMapGenerator` preloads a static 1000-level window (matching the
+spec's "1000 premiers niveaux pré-chargés"); the other 9000 of the "10 000
+accessible at launch" aren't generated yet.
+
+No real art for this screen exists yet -- the two mockups are one
+merged composite each (background + path + buttons + HUD baked
+together), and the creator is sending individual clean elements instead
+of having them cropped out of the composites. Until then, the screen
+renders on placeholders: a flat sky-blue gradient, a painted line
+standing in for the sand path, plain colored circles (with a glow + gold
+stars for validated levels, matte for not) standing in for the metallic
+level buttons, and Material icons for the HUD row instead of the coin/
+heart/compass/cup/shop art. `lib/screens/progression_map_screen.dart` is
+built so re-skinning is mostly swapping what each placeholder paints,
+not restructuring the scroll logic itself.
+
+Also worth knowing: per-level star history (1-3 stars per completed
+level) isn't tracked server-side yet -- `ProgressDTO` only carries a
+single `unlockedLevel` -- so every validated level currently shows a
+placeholder full 3 stars. And the level buttons' tap gesture and the
+screen's own drag-to-scroll gesture are both plain `GestureDetector`s
+layered on top of each other; Flutter's gesture arena usually resolves a
+quick tap vs. a real drag correctly by default, but this hasn't been
+exercised on a real device either -- worth a specific check once it can
+be run.
+
+`08-page-accueil.md`'s "PLAY" now pushes straight into this screen
+(after a best-effort `authenticateWithDevice()` so progress can load;
+falls back to "nothing validated" if offline or the backend isn't
+reachable). Tapping a level, or any of the three HUD buttons without a
+screen yet (rewards, shop, and the heart/coin counters themselves), lands
+on the same `ComingSoonScreen` stub used elsewhere (now shared, pulled out
+of `home_screen.dart` into `lib/widgets/coming_soon_screen.dart`).

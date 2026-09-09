@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../models/device_identity.dart';
+import '../networking/api_client.dart';
+import '../widgets/coming_soon_screen.dart';
 import '../widgets/home_action_buttons.dart';
+import 'progression_map_screen.dart';
 
 /// 08-page-accueil.md: the app's home screen, which also serves as its
 /// loading screen (never showing the word "chargement" itself).
@@ -45,18 +47,23 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _handlePlay() async {
-    await DeviceIdentity.current();
+    try {
+      // Establishes the device-local account session so the progression
+      // map can fetch real progress; offline/no-backend-yet is fine, the
+      // map just falls back to "nothing validated" in that case.
+      await ApiClient.shared.authenticateWithDevice();
+    } catch (_) {
+      // Ignored -- see above.
+    }
     if (!mounted) return;
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => const _ComingSoonScreen(
-        message: 'Le plateau de jeu arrive avec 11-ecran-de-jeu.md.',
-      ),
+      builder: (_) => const ProgressionMapScreen(),
     ));
   }
 
   void _handleSignIn() {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => const _ComingSoonScreen(
+      builder: (_) => const ComingSoonScreen(
         message: "L'écran de connexion n'est pas encore spécifié.",
       ),
     ));
@@ -116,27 +123,6 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-/// Stand-in destination for "PLAY" / "SE CONNECTER" until the game screen
-/// (`11-ecran-de-jeu.md`) and a sign-in screen exist. Deliberately minimal.
-class _ComingSoonScreen extends StatelessWidget {
-  const _ComingSoonScreen({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Coffee Break')),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(message, textAlign: TextAlign.center),
-        ),
       ),
     );
   }
