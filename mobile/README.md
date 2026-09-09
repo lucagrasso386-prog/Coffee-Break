@@ -387,31 +387,29 @@ What *doesn't* depend on that missing asset is done:
   than rebuild in code, to keep the exact painted bevel/highlight/gradient).
   The crop was harder than a normal détourage because the pills sit on the
   dirt path, not a flat background: both buttons cast a soft shadow onto
-  the path in the ~20px gap between them, and that cast shadow shares
-  enough of the pill's own pink/salmon hue that plain background-color-
-  distance thresholding pulled the shadow in as part of the shape (and, on
-  one attempt, bridged the two buttons into a single connected blob).
-  Fixed by finding the row where each button's own color ramps sharply back
-  up to full brightness (the true edge) versus where it's still just the
-  ambient shadow gradually fading back to bare dirt, and cropping the
-  source region at that row instead of at a fixed margin — no color
-  threshold ever has to touch the shadow pixels at all. A second pass
-  tightened "se connecter"'s crop on the right, where a bush's own cast
-  shadow on the path was similarly close enough in hue to bridge in as a
-  stray blob. Both are saved with the ambient path shadow deliberately
-  excluded, since a reusable UI sprite shouldn't carry a shadow baked in
-  from one specific background. A follow-up pass fixed two remaining
-  issues: a muddy fringe along the edges (the crop wasn't eroding past the
-  contaminated boundary band, so edge pixels still carried a mix of button
-  and background color baked in -- fixed by eroding deeper and unmixing
-  the background color out of the remaining feather band, same as the
-  earlier game-element sprites) and a jagged notch on "se connecter"'s
-  top-right corner (a scrap of the bush's cast shadow close enough in hue
-  to survive every color threshold tried -- fixed by smoothing the
-  silhouette's boundary via a blurred signed-distance re-threshold, since
-  a stadium-shaped button has no real jagged detail to preserve, so any
-  small notch or spike left after color thresholding is by definition an
-  artifact).
+  the path in the gap between them, a bush casts another shadow next to
+  "se connecter", and both shadows share enough of the pill's own
+  pink/salmon hue that every plain color-distance threshold tried pulled
+  some of one or the other in as part of the shape -- as a fringe, as a
+  jagged notch, or (worst case) as a bridge fusing the two buttons into one
+  blob. Went through a few fixes chasing this pixel-by-pixel (cropping the
+  source at the row where color snaps back to full brightness rather than a
+  fixed margin, deeper erosion plus unmixing the background out of the
+  remaining edge band, blurring the silhouette's signed distance to smooth
+  a stray notch) before recognizing these are vector-designed stadium
+  buttons -- a perfect capsule shape (rounded-rect corner radius equal to
+  half the height) -- so the outer silhouette doesn't need to be *found* at
+  all: it's two straight color transitions and a radius. Measured the true
+  edge on each side as the point of steepest color change (reliably
+  distinct from the ambient shadow's much slower gradient) at several
+  points along each side, fit the exact capsule from those, and used it
+  directly as the mask -- no color threshold touches the outer boundary
+  anymore. The interior (all shading, the highlight, the text, the
+  button's own dark bevel border) is still exactly the photographed
+  pixels; only the outer edge is reconstructed as the precise geometric
+  shape the button was always drawn as, extrapolated a few px past a
+  safely-interior sample so the edge color has no background blended into
+  it at all.
 - `lib/widgets/home_action_buttons.dart` — `PlayButton` and `SignInButton`,
   each just the cropped art wrapped in `SpringButton` for the required
   press/spring feedback. `onPressed` is left to the caller (load local
