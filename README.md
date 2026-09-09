@@ -86,7 +86,9 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       real art for day/golden hour (4 colors × unlit/lit) but still the
       placeholder circle at night, since the creator wants night's
       validated glow noticeably brighter than day's and no night button
-      art exists yet to show that. Decor scatter (palm trees, hibiscus,
+      art exists yet to show that. The 1-3 star rating above validated
+      nodes is real art too, one star asset reused at 3 sizes with a
+      layout that adapts to the count. Decor scatter (palm trees, hibiscus,
       plumeria, the Coffee Bar building) is still empty pools, ready for
       variants once sent. Day/night cycle *for the level map itself*, the
       biome swap every 10 levels, and infinite level generation past the

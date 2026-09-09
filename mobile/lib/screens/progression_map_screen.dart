@@ -619,16 +619,9 @@ class _LevelNode extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            height: 20,
+            height: _StarsRow._rowHeight,
             child: node.validated && node.stars > 0
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(
-                      node.stars,
-                      (_) => const Icon(Icons.star,
-                          color: Color(0xFFFFD34D), size: 18),
-                    ),
-                  )
+                ? _StarsRow(count: node.stars)
                 : null,
           ),
           if (useRealArt)
@@ -666,6 +659,60 @@ class _LevelNode extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// The 1-3 star rating above a validated level node. One real star
+/// asset (`assets/progression_map/star.png`), reused at different sizes
+/// rather than 3 separate cutouts -- the source render was the same
+/// star at 3 scales anyway. Per the creator ("la place s'adapte en
+/// fonction du nombre gagne"), the layout itself changes with the
+/// count rather than just hiding unearned slots: 1 is a single
+/// centered star, 2 are two even stars side by side, and 3 uses the
+/// classic bigger-and-raised center star (matching the reference image
+/// the creator sent) rather than 3 even stars in a row.
+class _StarsRow extends StatelessWidget {
+  const _StarsRow({required this.count});
+
+  final int count;
+
+  static const String _asset = 'assets/progression_map/star.png';
+  static const double _small = 16;
+  static const double _big = 24;
+  static const double _centerRaise = 6;
+  static const double _rowHeight = _big + _centerRaise;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (count) {
+      case 1:
+        return const Center(child: Image.asset(_asset, width: _small + 4, height: _small + 4));
+      case 2:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            Image.asset(_asset, width: _small, height: _small),
+            SizedBox(width: 6),
+            Image.asset(_asset, width: _small, height: _small),
+          ],
+        );
+      default:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: const [
+            Image.asset(_asset, width: _small, height: _small),
+            SizedBox(width: 4),
+            Padding(
+              padding: EdgeInsets.only(bottom: _centerRaise),
+              child: Image.asset(_asset, width: _big, height: _big),
+            ),
+            SizedBox(width: 4),
+            Image.asset(_asset, width: _small, height: _small),
+          ],
+        );
+    }
   }
 }
 

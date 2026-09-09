@@ -669,6 +669,27 @@ this file: a soft light effect painted into a chroma-key composite
 needs alpha derived from the real color gradient, not a hard silhouette
 with a thin feather bolted on.
 
+The star rating above validated nodes is real art now too
+(`assets/progression_map/star.png`). First attempt was waved off before
+any cutout work started: the creator's source image carried a faint
+"pngtree" watermark baked into the pixels (a stock-clipart tell), so it
+got flagged and set aside rather than used -- shipping a watermarked
+stock asset isn't "detourage" of the creator's own material, and the
+watermark would've been small-but-present in the final art. The
+replacement source was clean. Only one star got cut, not three --
+despite the reference image showing three (a small one, a big one, a
+small one), they're the same star at 3 scales, not 3 different
+designs, so `_StarsRow` in `progression_map_screen.dart` reuses the one
+asset at different sizes instead. Per the creator ("la place s'adapte
+en fonction du nombre gagne"), the *layout* changes with the star
+count rather than just hiding unearned slots: 1 star centers alone, 2
+sit evenly side by side, and 3 uses the classic bigger-and-raised
+center star from the reference image rather than 3 even stars in a
+row. Cutout-wise this one was easy by comparison to the buttons: a
+flat, solid coral background with a crisp (2-3px) edge, no gradual
+glow to worry about and no spill (gold's own red-heavy channel makes a
+red-background despill unsafe to apply anyway, so it's skipped here).
+
 The creator is planning to send more decor variety than just one of each
 piece (several palm trees, several flower clusters, ...), specifically so
 the path doesn't read as one motif copy-pasted down its whole length --
