@@ -18,9 +18,9 @@ import '../widgets/spring_button.dart';
 /// 09-carte-progression.md: the level map. Most decor art (palm trees,
 /// the "Coffee Bar" building, the sky, clouds) isn't in yet -- this is the
 /// scroll mechanism and level-node behavior on placeholder shapes, to be
-/// re-skinned once those assets arrive. The sand path (all three lighting
-/// variants) and the grass ground (day and golden hour) are in and
-/// already wired.
+/// re-skinned once those assets arrive. The sand path and the grass
+/// ground (all three lighting variants, both of them) are in and already
+/// wired.
 /// Deliberately deferred for this pass, same as earlier files' pattern of
 /// modeling a not-yet-buildable system as data/behavior first: the
 /// day/night cycle, the biome change every 10 levels, and infinite level
@@ -121,18 +121,15 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   // top by `_GrassPainter`, per the creator's own "sometimes just green,
   // sometimes green with a tuft" direction.
   //
-  // No night variant yet -- falls back to day, same as the sand path did
-  // before its own night texture arrived (night is the bigger lighting
-  // jump next to golden hour either way).
   static const Map<DayNightPeriod, String> _grassPlainByPeriod = {
     DayNightPeriod.day: 'assets/progression_map/grass_plain_day.jpg',
     DayNightPeriod.goldenHour: 'assets/progression_map/grass_plain_golden.jpg',
-    DayNightPeriod.night: 'assets/progression_map/grass_plain_day.jpg',
+    DayNightPeriod.night: 'assets/progression_map/grass_plain_night.jpg',
   };
   static const Map<DayNightPeriod, String> _grassTuftByPeriod = {
     DayNightPeriod.day: 'assets/progression_map/grass_tuft_day.png',
     DayNightPeriod.goldenHour: 'assets/progression_map/grass_tuft_golden.png',
-    DayNightPeriod.night: 'assets/progression_map/grass_tuft_day.png',
+    DayNightPeriod.night: 'assets/progression_map/grass_tuft_night.png',
   };
 
   Future<void> _loadGrassTextures() async {
