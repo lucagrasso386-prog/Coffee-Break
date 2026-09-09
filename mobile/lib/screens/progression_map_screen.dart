@@ -6,6 +6,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/currency.dart';
+import '../models/day_night_period.dart';
 import '../models/decor_variant.dart';
 import '../models/level_map_node.dart';
 import '../networking/api_client.dart';
@@ -93,8 +94,17 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     }
   }
 
+  // Night variant not sent yet -- falls back to day rather than golden
+  // hour, since night is the bigger lighting jump either way.
+  static const Map<DayNightPeriod, String> _pathTextureByPeriod = {
+    DayNightPeriod.day: 'assets/progression_map/sand_path_day.jpg',
+    DayNightPeriod.goldenHour: 'assets/progression_map/sand_path_golden.jpg',
+    DayNightPeriod.night: 'assets/progression_map/sand_path_day.jpg',
+  };
+
   Future<void> _loadPathTexture() async {
-    final bytes = await rootBundle.load('assets/progression_map/sand_path_day.jpg');
+    final asset = _pathTextureByPeriod[DayNightSchedule.current()]!;
+    final bytes = await rootBundle.load(asset);
     final codec = await ui.instantiateImageCodec(bytes.buffer.asUint8List());
     final frame = await codec.getNextFrame();
     if (!mounted) {
