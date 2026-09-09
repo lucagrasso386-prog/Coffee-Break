@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../models/cloud_schedule.dart';
 import '../models/currency.dart';
 import '../models/day_night_period.dart';
 import '../models/decor_variant.dart';
@@ -59,6 +60,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   ui.Image? _grassTuft;
   late final String _skyAsset;
   late final DayNightPeriod _period;
+  late final int _cloudCount;
 
   static const Map<DayNightPeriod, String> _skyByPeriod = {
     DayNightPeriod.day: 'assets/progression_map/sky_day.jpg',
@@ -73,6 +75,24 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     'assets/progression_map/twinkle_moon.png',
     'assets/progression_map/twinkle_star_big.png',
     'assets/progression_map/twinkle_star_small.png',
+  ];
+
+  // Only a day variant exists so far -- golden hour/night reuse it rather
+  // than showing nothing, same fallback the sand path and grass used
+  // before their own dedicated variants arrived.
+  static const List<String> _cloudAssets = [
+    'assets/progression_map/cloud_1_day.png',
+    'assets/progression_map/cloud_2_day.png',
+  ];
+
+  // 3 fixed positions (fraction of the sky area) rather than a random
+  // scatter -- there are only ever 2 or 3 clouds on screen, few enough
+  // that a deliberate placement reads better than a seeded-random one.
+  // Cycles through `_cloudAssets` by index, not one variant per slot.
+  static const List<_CloudSlot> _cloudSlots = [
+    _CloudSlot(left: 0.12, top: 0.08, width: 0.42),
+    _CloudSlot(left: 0.58, top: 0.04, width: 0.36),
+    _CloudSlot(left: 0.36, top: 0.20, width: 0.30),
   ];
 
   double get _minRotation => 0;
@@ -93,6 +113,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     // background pick -- not re-evaluated on every rebuild.
     _period = DayNightSchedule.current();
     _skyAsset = _skyByPeriod[_period]!;
+    _cloudCount = CloudSchedule.countFor();
     _flingController = AnimationController.unbounded(vsync: this)
       ..addListener(() {
         setState(() {
@@ -305,6 +326,13 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                     height: height * 0.35,
                     child: const TwinkleField(assets: _twinkleAssets),
                   ),
+                for (var i = 0; i < _cloudCount; i++)
+                  Positioned(
+                    left: _cloudSlots[i].left * width,
+                    top: _cloudSlots[i].top * height,
+                    width: _cloudSlots[i].width * width,
+                    child: Image.asset(_cloudAssets[i % _cloudAssets.length]),
+                  ),
                 // Ground: no horizon/hill art yet, so this is a plain
                 // horizontal cutoff rather than a shaped hillside -- a
                 // reasonable placeholder split, not a measured one.
@@ -343,6 +371,16 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
       ),
     );
   }
+}
+
+/// A fixed cloud position, as a fraction of the sky area -- see
+/// `_cloudSlots`.
+class _CloudSlot {
+  const _CloudSlot({required this.left, required this.top, required this.width});
+
+  final double left;
+  final double top;
+  final double width;
 }
 
 class _ProjectedNode {
