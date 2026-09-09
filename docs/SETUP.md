@@ -14,13 +14,13 @@ ship at launch (see the root `README.md` architecture note).
   - Enable capabilities: **Sign In with Apple**, **In-App Purchase**.
 - [ ] Create a new **App Store Connect** app record using that Bundle ID.
       (App name comes from `02-identite-visuelle.md`.)
-- [ ] Update the Bundle ID in three places once created:
-  - `codemagic.yaml` → `bundle_identifier` (and `APP_STORE_APPLE_ID`, the
-    numeric Apple ID shown in App Store Connect → App Information)
-  - the generated `mobile/ios/Runner.xcodeproj` (via Xcode's Signing &
-    Capabilities tab, after running `flutter create .` — see
-    `mobile/README.md`) — only needed if you also build locally on a Mac
+- [ ] Update the Bundle ID in two places once created:
+  - `mobile/.github` workflows use `com.yourcompany` as the org passed to
+    `flutter create` (see step 3) — keep it consistent, or update both
+    workflow files if you pick a different reverse-DNS prefix
   - `backend/.env` → `APPLE_BUNDLE_ID`
+- [ ] Find your **Team ID** (Apple Developer → Membership, a 10-character
+      code, different from the Bundle ID) — needed in step 3.
 
 ## 2. Google Play Console
 
@@ -40,38 +40,56 @@ ship at launch (see the root `README.md` architecture note).
 - [ ] Enable **Play App Signing** when first uploading a build — Google
       manages the release signing key from then on.
 
-## 3. Codemagic (build the iOS app on a Mac you don't own)
+## 3. GitHub Actions (build the iOS app on a Mac you don't own)
 
 No Mac is available anywhere in this project's toolchain (not this coding
 session, and per your setup, not you either) — but building an iOS `.ipa`
 and signing it for TestFlight is an Apple requirement that always needs a
-real Mac somewhere. [Codemagic](https://codemagic.io) rents that Mac by the
-build-minute and can push straight to TestFlight when it's done, so this is
-how you test on your iPhone without buying one. `codemagic.yaml` at the repo
-root is already configured for this — it just needs your credentials, which
-only you can provide:
+real Mac somewhere. GitHub Actions can run jobs on Apple's own `macos`
+runners, for free within GitHub's monthly minutes — no third-party account
+needed, since it's a setting on this repo you already own. Two workflows
+are already in the repo:
 
-- [ ] Create a Codemagic account and connect it to this GitHub repo.
-- [ ] In Codemagic → your team → **Integrations** → **App Store Connect**,
-      add an API key:
-  - In App Store Connect → Users and Access → Integrations → App Store
-    Connect API, generate a key with **App Manager** access.
-  - Give the Codemagic integration the exact name `coffee_break_asc_api_key`
-    (or update that name in `codemagic.yaml` to match whatever you chose).
-- [ ] Fill in the two placeholders in `codemagic.yaml`:
-  `bundle_identifier` and `APP_STORE_APPLE_ID` (see step 1 above).
-- [ ] In App Store Connect, create an **Internal Testers** TestFlight group
-      (or rename the `beta_groups` entry in `codemagic.yaml` to match a
-      group you already have) and add yourself to it with the Apple ID your
-      iPhone is signed into.
-- [ ] Start the `ios-testflight` workflow manually from the Codemagic
-      dashboard. Once it succeeds, the build shows up in the **TestFlight**
-      app on your iPhone within a few minutes (first build on a fresh Apple
-      ID/device sometimes needs the TestFlight invite email accepted first).
-- [ ] `codemagic.yaml` was written without being run against Codemagic's own
-      validator (no access to Codemagic from the coding session either) — if
-      the first build fails on a config error rather than a code error,
-      paste the error back and it'll get fixed.
+- `.github/workflows/ios-build-check.yml` — compiles unsigned on every push
+  that touches `mobile/`, no secrets needed, just to catch build breaks early.
+- `.github/workflows/ios-testflight.yml` — signs a real build and uploads it
+  to TestFlight. Manually triggered (from GitHub's Actions tab, or by asking
+  the assistant to trigger it via the GitHub API — no need to open GitHub
+  yourself either way).
+
+The signing step needs five secrets, added once in **this repo's** Settings
+→ Secrets and variables → Actions → New repository secret (this is a GitHub
+setting under your existing account, not a new external service):
+
+- [ ] **App Store Connect API key** (App Store Connect → Users and Access →
+      Integrations → App Store Connect API → generate a key with **App
+      Manager** access): gives you an Issuer ID, a Key ID, and a `.p8` file
+      to download once (Apple only lets you download it once — save it).
+      Store as:
+  - `ASC_ISSUER_ID`
+  - `ASC_KEY_ID`
+  - `ASC_KEY_P8` — the full contents of the downloaded `.p8` file
+- [ ] **Distribution certificate**: in Apple Developer → Certificates,
+      create (or reuse) an **Apple Distribution** certificate, export it
+      from Keychain Access as a `.p12` file with a password you choose.
+      Store as:
+  - `IOS_DIST_CERT_P12` — the `.p12` file, base64-encoded
+    (`base64 -i cert.p12 | pbcopy` on a Mac, or any base64 tool)
+  - `IOS_DIST_CERT_PASSWORD` — the password you set when exporting
+- [ ] **Keychain password**: any random string you make up, used only to
+      protect the temporary keychain the workflow creates and deletes on
+      each run. Store as `IOS_CI_KEYCHAIN_PASSWORD`.
+- [ ] Fill in your **Team ID** in `mobile/ExportOptions.plist` (see step 1).
+- [ ] In App Store Connect, add yourself as a tester (your Apple ID, the one
+      your iPhone is signed into) to an **Internal Testing** group — no
+      review needed for internal testers.
+- [ ] Trigger the `ios-testflight` workflow once everything above is in
+      place. Once it succeeds, the build shows up in the **TestFlight** app
+      on your iPhone within a few minutes.
+- [ ] These two workflow files were written without being able to run them
+      here (no macOS runner access from the coding session either) — if the
+      first run fails on a config error rather than a code error, paste the
+      error back and it'll get fixed.
 
 Android has no such gap: `flutter run` straight from a laptop onto a phone
 over USB works without any of this, since Google doesn't require a
@@ -95,7 +113,7 @@ proprietary OS to build for its own platform.
       validation. You'll get an Issuer ID, Key ID, and a `.p8` private key —
       put them in `backend/.env` as `APPLE_ISSUER_ID`, `APPLE_KEY_ID`,
       `APPLE_IAP_PRIVATE_KEY`. (Separate key from the App Store Connect API
-      key used for Codemagic in step 3 — different access scope.)
+      key used for signing in step 3 — different access scope.)
 - [ ] Generate a **Google Play Developer API** service account (Play
       Console → Users and permissions → API access) for server-side receipt
       validation on Android. The backend doesn't verify Google Play receipts

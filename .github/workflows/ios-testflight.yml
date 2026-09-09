@@ -1,0 +1,105 @@
+name: iOS TestFlight
+
+# Signs and uploads a real build to TestFlight. Needs the GitHub Secrets
+# listed in docs/SETUP.md step 3 -- nothing here can create those for you,
+# they're tied to your Apple Developer account. Triggered manually (from
+# GitHub's Actions tab, or via the GitHub API on your behalf) rather than
+# on every push, since each run uses build-minute quota and uploads a real
+# TestFlight build.
+on:
+  workflow_dispatch:
+    inputs:
+      send:
+        description: "Upload to TestFlight after signing (uncheck to just verify signing works)"
+        type: boolean
+        default: true
+
+jobs:
+  build-and-upload:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate the Flutter iOS platform project
+        run: flutter create --platforms=ios --org com.yourcompany --project-name coffee_break .
+
+      - name: Install Flutter packages
+        run: flutter pub get
+
+      - name: Import the distribution certificate into a temporary keychain
+        env:
+          CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_CI_KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/ci-signing.keychain-db"
+          CERT_PATH="$RUNNER_TEMP/dist_cert.p12"
+          echo -n "$CERT_P12_BASE64" | base64 --decode -o "$CERT_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT_PATH" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/"//g')
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+      - name: Install the App Store Connect API key
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$ASC_KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_"$ASC_KEY_ID".p8
+
+      - name: Compile the Flutter assets (no signing yet)
+        run: flutter build ios --release --no-codesign
+
+      - name: Archive and export the signed .ipa
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          AUTH_KEY_PATH=~/.appstoreconnect/private_keys/AuthKey_"$ASC_KEY_ID".p8
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -sdk iphoneos \
+            -configuration Release -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            archive -allowProvisioningUpdates \
+            -authenticationKeyPath "$AUTH_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/Runner.xcarchive" \
+            -exportPath "$RUNNER_TEMP/export" -exportOptionsPlist ../ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$AUTH_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Upload to TestFlight
+        if: ${{ inputs.send }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcrun altool --upload-app -f "$RUNNER_TEMP/export/Runner.ipa" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Upload the .ipa as a workflow artifact
+        if: ${{ !inputs.send }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coffee-break-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+
+      - name: Remove the temporary signing keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/ci-signing.keychain-db" || true

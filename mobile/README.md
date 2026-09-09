@@ -37,10 +37,15 @@ machine before shipping.
 
 ## Testing on your own iPhone without a Mac
 
-`../codemagic.yaml` builds the iOS app on a Codemagic-hosted Mac and pushes
-it straight to TestFlight — see `../docs/SETUP.md` step 3 for the one-time
-account setup. Android has no such requirement: `flutter run` over USB from
-any laptop works directly, no cloud build needed.
+`../.github/workflows/ios-testflight.yml` builds the iOS app on a GitHub
+Actions `macos` runner and pushes it straight to TestFlight — see
+`../docs/SETUP.md` step 3 for the one-time secrets setup (all under this
+repo's own GitHub settings, no third-party account needed).
+`ios-build-check.yml` runs an unsigned compile check on every push that
+touches `mobile/`, no secrets required, just to catch build breaks early.
+
+Android has no such requirement: `flutter run` over USB from any laptop
+works directly, no cloud build needed.
 
 ## Generate the platform projects
 
