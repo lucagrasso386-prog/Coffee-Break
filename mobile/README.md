@@ -400,7 +400,18 @@ What *doesn't* depend on that missing asset is done:
   shadow on the path was similarly close enough in hue to bridge in as a
   stray blob. Both are saved with the ambient path shadow deliberately
   excluded, since a reusable UI sprite shouldn't carry a shadow baked in
-  from one specific background.
+  from one specific background. A follow-up pass fixed two remaining
+  issues: a muddy fringe along the edges (the crop wasn't eroding past the
+  contaminated boundary band, so edge pixels still carried a mix of button
+  and background color baked in -- fixed by eroding deeper and unmixing
+  the background color out of the remaining feather band, same as the
+  earlier game-element sprites) and a jagged notch on "se connecter"'s
+  top-right corner (a scrap of the bush's cast shadow close enough in hue
+  to survive every color threshold tried -- fixed by smoothing the
+  silhouette's boundary via a blurred signed-distance re-threshold, since
+  a stadium-shaped button has no real jagged detail to preserve, so any
+  small notch or spike left after color thresholding is by definition an
+  artifact).
 - `lib/widgets/home_action_buttons.dart` — `PlayButton` and `SignInButton`,
   each just the cropped art wrapped in `SpringButton` for the required
   press/spring feedback. `onPressed` is left to the caller (load local
