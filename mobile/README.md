@@ -287,6 +287,22 @@ flag it if the creator intended the opposite.
   before a tight 1px feather + background-color unmix on the new, clean
   boundary.
 
+## Boost powers (`06-pouvoirs-des-bonus.md`)
+
+- `lib/models/boost_power.dart` — `BoostTargeting` (how the player picks a
+  target for each boost: a column, a single board element, an element
+  *type*, no target at all, or the two-step "tap a board element for the
+  source type, then tap a destination icon off-board" flow that jus
+  d'orange needs) and an `effectDescription` per `Boost` case, as text —
+  same static-data-only treatment as `SpecialPiece`/`Obstacle` in
+  `05-mecaniques-de-jeu.md`, since actually running any of these five
+  effects needs the match-3 board engine, which is still `11-ecran-de-jeu.md`.
+- `maxEquippedBoosts = 5` — the mission-sheet loadout cap the spec mentions
+  ("max 5 bonus"). Not enforced anywhere yet; there's no mission sheet
+  screen or loadout state to enforce it in until `10-fiche-mission-niveau.md`.
+- No new assets — this file is pure behavior, reusing the boost sprites
+  already wired in `03-assets-de-jeu.md`.
+
 ## Accounts (`01-setup-projet-et-architecture.md`)
 
 - `lib/models/device_identity.dart` — device-local account id, wiped on

@@ -54,4 +54,8 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       `mobile/README.md` for details, including one naming assumption
       flagged for the creator to confirm). Board generation and the match-3
       engine itself are deferred to `09`/`10`/`11`.
-- [ ] `06-pouvoirs-des-bonus.md` onward — not started yet.
+- [x] `06-pouvoirs-des-bonus.md` — targeting shape and effect description
+      for each of the 5 boosts, plus the 5-boost mission-sheet loadout cap,
+      as static data (`mobile/lib/models/boost_power.dart`). No new assets;
+      actually running the effects is still `11-ecran-de-jeu.md`.
+- [ ] `07-*.md` onward — not started yet.
