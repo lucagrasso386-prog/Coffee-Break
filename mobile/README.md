@@ -379,7 +379,18 @@ unmodified as always; confirmed: the decorative pastries scattered in the
 grass are part of that fixed background image, not recomposited from the
 individual `assets/game_elements/` sprites).
 
-- `assets/home/home_background.jpg` — the background, unmodified.
+- `assets/home/home_background_day.jpg`, `_golden.jpg`, `_night.jpg` — the
+  background, unmodified, in the three lighting variants the creator has
+  sent so far. Turns out `09-carte-progression.md`'s day/night cycle
+  ("basé sur l'heure et le fuseau horaire réels du téléphone") applies
+  here too, not just the level map -- confirmed by the creator sending a
+  golden-hour and a night version of this same background unprompted.
+  `lib/models/day_night_period.dart` (`DayNightSchedule.current()`) maps
+  the phone's local hour to one of the three (morning and evening golden
+  hour share the same art, per what was actually delivered); picked once
+  in `initState`, not re-picked on every rebuild. The hour boundaries are
+  a reasoned placeholder split, not a measured one -- there's no
+  astronomical sunrise/sunset input, per the spec, just local time.
 - `assets/branding/logo_coffee_break.png` — the "Coffee Break" logo (heart,
   wood sign, leaf, checkered ribbon), cut from `logo-coffee-break.jpg`.
   Much simpler détourage than the buttons since the source sits on a flat
@@ -401,12 +412,12 @@ individual `assets/game_elements/` sprites).
   the screen's own width/height (measured off the original mockup, which
   is why the layered background needed to keep the same crop/aspect ratio
   the mockup had) rather than a fixed pixel value, per the
-  screen-adaptability rule. "PLAY" ensures a local device id exists
-  (`DeviceIdentity.current()`) then navigates on; "SE CONNECTER" navigates
-  straight to a stand-in screen — neither the game board
-  (`11-ecran-de-jeu.md`) nor an account/sign-in screen exists yet, so both
-  buttons currently land on a minimal placeholder rather than something
-  invented ahead of its spec file.
+  screen-adaptability rule. "PLAY" establishes the device-local account
+  session (`ApiClient.authenticateWithDevice()`, best-effort -- offline/
+  no-backend is fine) then opens the progression map
+  (`09-carte-progression.md`); "SE CONNECTER" navigates to a stand-in
+  screen, since no account/sign-in screen exists yet -- see below for the
+  progression map, and `widgets/coming_soon_screen.dart` for the stand-in.
 - `lib/main.dart` — now boots straight into `HomeScreen`.
 
 Earlier groundwork, still true:
@@ -482,7 +493,17 @@ metallic level buttons. `lib/screens/progression_map_screen.dart` is
 built so re-skinning is mostly swapping what each placeholder paints, not
 restructuring the scroll logic itself. Since biome switching is deferred
 (see above), the transition bridge asset isn't needed for this pass
-either.
+either. Confirmed still needed on top of the original list (palm trees,
+hibiscus, plumeria, Coffee Bar, sand path, level buttons): the sky itself
+(currently a flat two-color gradient, no texture) and the grass the path
+sits on, which doesn't exist as a layer at all yet.
+
+While asking about the sky, the creator mentioned the day/night cycle
+applies to `08-page-accueil.md`'s background too, not just this screen --
+already wired there (see that section above) once they sent the golden-
+hour and night variants. Every decor piece for *this* screen will need
+day/night pairs as well eventually, per the creator; not modeled yet
+since none of the tropical decor art exists here yet regardless.
 
 The HUD row, on the other hand, is fully real art now (`_HudButton`
 still supports a Material `icon` placeholder as a fallback, but nothing

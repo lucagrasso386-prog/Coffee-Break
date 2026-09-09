@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/day_night_period.dart';
 import '../networking/api_client.dart';
 import '../widgets/coming_soon_screen.dart';
 import '../widgets/home_action_buttons.dart';
@@ -23,13 +24,25 @@ class _HomeScreenState extends State<HomeScreen>
   late final AnimationController _controller;
   late final Animation<Offset> _logoSlide;
   late final Animation<Offset> _buttonsSlide;
+  late final String _backgroundAsset;
 
   static const _revealDelay = Duration(milliseconds: 350);
   static const _revealDuration = Duration(milliseconds: 450);
 
+  static const Map<DayNightPeriod, String> _backgroundByPeriod = {
+    DayNightPeriod.day: 'assets/home/home_background_day.jpg',
+    DayNightPeriod.goldenHour: 'assets/home/home_background_golden.jpg',
+    DayNightPeriod.night: 'assets/home/home_background_night.jpg',
+  };
+
   @override
   void initState() {
     super.initState();
+    // Fixed once per screen instance -- picking again mid-session (e.g.
+    // on every animation frame's rebuild) would be wasteful and could
+    // flip the background under the player's thumb right at the hour
+    // boundary.
+    _backgroundAsset = _backgroundByPeriod[DayNightSchedule.current()]!;
     _controller = AnimationController(vsync: this, duration: _revealDuration);
     _logoSlide = Tween<Offset>(begin: const Offset(-1.6, 0), end: Offset.zero)
         .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
@@ -79,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen>
             fit: StackFit.expand,
             children: [
               Image.asset(
-                'assets/home/home_background.jpg',
+                _backgroundAsset,
                 fit: BoxFit.cover,
               ),
               Positioned(

@@ -69,19 +69,23 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
 - [x] `08-page-accueil.md` — the home screen (`mobile/lib/screens/home_screen.dart`),
       also the app's boot screen. Background appears first, then the logo
       (from the left) and the "PLAY"/"SE CONNECTER" buttons (from the
-      right) slide in together. "PLAY" ensures a local device id exists
-      and "SE CONNECTER" opens a stand-in screen, since neither the game
-      board nor an account screen exists yet — see `mobile/README.md` for
-      details, including the logo's détourage.
+      right) slide in together. The background now switches between day,
+      golden hour, and night art based on the phone's local time — turns
+      out `09`'s day/night cycle applies here too, not just the level map.
+      "PLAY" opens the progression map and "SE CONNECTER" opens a
+      stand-in screen, since no account screen exists yet — see
+      `mobile/README.md` for details, including the logo's détourage.
 - [ ] `09-carte-progression.md` — **core in, decor pending**: the level
       map's real 3D-perspective scroll engine (a level's angle on an
       invisible drum projected against the current rotation —
       `mobile/lib/widgets/cylinder_projection.dart`), level button states,
       and HUD are built and wired from "PLAY"
-      (`mobile/lib/screens/progression_map_screen.dart`), but running on
-      placeholder shapes (no real art yet — the creator is sending
-      individual decor elements rather than having them cropped from the
-      two merged mockups). Day/night cycle, the biome swap every 10
-      levels, and infinite level generation past the first 1000 preloaded
-      are explicitly deferred. See `mobile/README.md` for details. `10`
+      (`mobile/lib/screens/progression_map_screen.dart`). The HUD is real
+      art now (5/5 icons); the background/path/level buttons still run on
+      placeholders — the creator is sending individual decor elements
+      (including sky/clouds/grass, and day/night pairs of each) rather
+      than having them cropped from the two merged mockups. Day/night
+      cycle *for the level map itself*, the biome swap every 10 levels,
+      and infinite level generation past the first 1000 preloaded are
+      still explicitly deferred. See `mobile/README.md` for details. `10`
       onward not started yet.
