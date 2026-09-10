@@ -1129,3 +1129,67 @@ Lives shown here are just whatever was passed down from the map's last
 fetched `ProgressDTO`, unchanged for the whole session. Not run on a
 device or simulator from this environment, same caveat as everything
 else.
+
+## Rewards screen (`13-ecran-recompenses.md`)
+
+Reached from the map's bottom HUD "café" icon (`onRewards`, previously
+a stub), `RewardsScreen` (`lib/screens/rewards_screen.dart`) is a
+battle-pass-style vertical list of tiers, one every `xpPerRewardTier`
+(30 000) XP, each granting the same fixed bundle (`rewardTierBundle` in
+`lib/models/reward_tier.dart`) on a free (left) and premium/subscriber
+(right) side. No back button anywhere -- the spec's "uniquement swipe
+gauche/droite pour quitter" is enforced for real: `PopScope(canPop:
+false)` blocks the system back button/gesture, and only this screen's
+own `onHorizontalDragEnd` (velocity threshold) can leave it.
+
+**Reading the two mockups against the prose**: both the "état initial"
+and "palier atteint" reference screenshots show the same pill shape at
+the same spot on each tier's bar, while the prose separately describes
+a "la barre réapparaît où le joueur l'avait laissée, avance rapidement
+jusqu'à sa position actuelle en ralentissant à l'arrivée" catch-up
+animation. Taken together, that reads as: the pill is a **static cap
+marker** per tier (just glowing once that tier is unlocked), and the
+actual animated "fill" is the **scroll position** advancing up a long
+vertical list of tiers as XP grows, not an in-tier fill gauge. That's a
+reasoned interpretation, not something confirmed by the creator --
+flagging it here in case the real intent was a continuous gauge inside
+each pill.
+
+**Catch-up animation**: the last XP value the player saw this screen at
+is stored locally (`SharedPreferences`, `coffeebreak.rewardsLastSeenXp`
+-- same lightweight local-persistence pattern as the session token in
+`ApiClient`). On open, if XP grew since last visit, the list jumps
+straight to the old scroll position (no animation, since nothing should
+visibly move yet) and then eases to the new one over 900ms. First-ever
+visit stores the current XP without animating from zero, since that
+would fabricate a "gap" that was never real.
+
+**Claiming a reward**: tapping an unlocked, unclaimed icon plays a
+2-second scale-and-glow-then-slide-off-screen animation
+(`_ClaimAnimationOverlay`), matching the spec's "s'affiche en plein
+milieu de l'écran en brillant, puis disparaît rapidement vers la
+droite." Claimed state is session-only (a `Set<String>` of tier/item/
+column ids) -- there's no backend endpoint to persist a claim yet, same
+honest-placeholder pattern as `BoostInventory`. Tapping a premium-column
+reward while `_hasActiveSubscription` is false (always, right now --
+no subscription state exists anywhere in this app until
+`14-boutique.md`) redirects to `ComingSoonScreen` instead of granting
+anything.
+
+No "money bag" asset exists for the mockup's larger x750 coin rewards,
+so every coin line item reuses the one real `Currency.coinCafe` sprite,
+differentiated only by the printed quantity -- same reasoning as the
+small/large coin reuse on the mission sheet's boost-cost mockups back
+in `10-fiche-mission-niveau.md`.
+
+Deliberately deferred: only the first 20 tiers are preloaded (no
+infinite/lazy generation past that, matching the "cœur d'abord" scoping
+used for `09`'s levels and `11`'s board); actual subscription purchase
+flow (`14-boutique.md`); persisting a claim server-side. Not run on a
+device or simulator from this environment, same caveat as everything
+else -- in particular, a subtle Flutter layout rule this file tripped
+during self-review is worth a callout for future files: a `Positioned`
+widget must sit directly under a `Stack` with nothing but Stateless/
+StatefulWidgets in between it and that `Stack`; `IgnorePointer` (used to
+make the claim overlay click-through) is itself a RenderObjectWidget,
+so it has to wrap the `Positioned`'s *child*, not the other way around.

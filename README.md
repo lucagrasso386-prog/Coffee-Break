@@ -141,4 +141,16 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       (`mobile/lib/widgets/loading_transition_overlay.dart`) for its
       first real use — it existed since `07-regles-globales-ui.md` but
       had never been used in a navigation flow until now. See
-      `mobile/README.md` for details. `13` onward not started yet.
+      `mobile/README.md` for details.
+- [x] `13-ecran-recompenses.md` — the battle-pass-style rewards screen
+      (`mobile/lib/screens/rewards_screen.dart`), reached from the map's
+      bottom HUD "café" icon. A vertical list of XP tiers (30 000 XP
+      each, 20 preloaded), each granting the same fixed reward bundle on
+      a free and a premium/subscriber side, with a catch-up scroll
+      animation when XP grew since the player's last visit and a 2s
+      claim animation per reward. No back button — swipe left/right is
+      the only way out, enforced with `PopScope(canPop: false)`. Claimed
+      state and the premium column are honest placeholders (no backend
+      persistence, no subscription system yet). See `mobile/README.md`
+      for details, including a documented interpretation call on the
+      pill-marker-vs-fill-gauge question. `14` onward not started yet.

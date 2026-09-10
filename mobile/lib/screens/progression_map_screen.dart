@@ -17,6 +17,7 @@ import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
 import '../widgets/twinkle_field.dart';
 import 'level_mission_screen.dart';
+import 'rewards_screen.dart';
 
 /// 09-carte-progression.md: the level map. Most decor art (palm trees,
 /// hibiscus, plumeria, the "Coffee Bar" building, clouds) isn't in yet --
@@ -499,7 +500,9 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
                     onLives: () => _openStub('Les vies -- déjà géré par 04-systemes-progression-et-xp.md, pas encore affiché ici.'),
                     onCoins: () => _openStub('La monnaie -- pas encore d\'écran dédié.'),
                     onMap: () {}, // already here
-                    onRewards: () => _openStub("L'écran de récompenses n'est pas encore spécifié."),
+                    onRewards: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => RewardsScreen(xp: _progress?.xp ?? 0)),
+                    ),
                     onShop: () => _openStub("14-boutique.md n'est pas encore construit."),
                   ),
                 ),
