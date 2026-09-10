@@ -8,6 +8,7 @@ import '../models/game_board.dart';
 import '../models/game_element.dart';
 import '../models/level_map_node.dart';
 import '../models/level_mission.dart';
+import 'level_end_popups.dart';
 
 /// 11-ecran-de-jeu.md: the match-3 board itself. This is the "cœur"
 /// pass only -- see mobile/README.md for the full list of what's
@@ -177,33 +178,21 @@ class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateM
   }
 
   void _finishLevel({required bool won}) {
-    // 11-ecran-de-jeu.md is explicit that the real win/lose animations
-    // (star + score reveal, the lost-level animation) aren't built yet --
-    // see also 12-popups-fin-de-niveau.md. This dialog is an honest,
-    // unanimated stand-in that still reports the real result.
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(won ? 'Niveau ${widget.node.number} réussi !' : 'Niveau ${widget.node.number} raté'),
-        content: Text(won
-            ? '$_starsEarned étoile(s) -- $_starDust poussière d\'étoile au total. '
-                'L\'animation de victoire (étoiles + score) n\'est pas encore '
-                'construite -- voir 12-popups-fin-de-niveau.md.'
-            : 'Plus de mouvements disponibles. L\'animation de défaite '
-                'n\'est pas encore construite -- voir 12-popups-fin-de-niveau.md.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              Navigator.of(context).pop(); // game -> mission sheet
-              Navigator.of(context).pop(); // mission sheet -> map
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    // 12-popups-fin-de-niveau.md's popup, pushed as its own non-opaque
+    // overlay (blurred scrim over this frozen board) rather than a
+    // Navigator.pop chain -- both popups leave the whole mission-sheet/
+    // game-screen stack behind via pushAndRemoveUntil once the player
+    // acts on them (see level_end_popups.dart's `_goTo`).
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => won
+          ? LevelWonPopup(node: widget.node, score: _starDust, starsEarned: _starsEarned)
+          : LevelLostPopup(
+              node: widget.node,
+              mission: widget.mission,
+              selectedBoosts: widget.selectedBoosts,
+              livesRemaining: widget.livesRemaining,
+            ),
+    ));
   }
 
   static const Map<DayNightPeriod, String> _backgroundByPeriod = {

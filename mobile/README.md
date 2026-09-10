@@ -1032,14 +1032,10 @@ the creator set for `09-carte-progression.md`):
 - **Loading/opening animation.** Explicitly "prévue mais pas encore
   réalisée" in the spec itself -- the board is simply already in place
   when the screen opens, matching that.
-- **The real win/lose animations.** The spec is explicit these aren't
-  built yet either ("pas encore réalisée," both for victory's star+score
-  reveal and for the lost-level animation -- see
-  `12-popups-fin-de-niveau.md`). Right now, winning or losing shows a
-  plain `AlertDialog` reporting the real result (stars earned, total
-  star-dust, or "out of moves") before popping back through the mission
-  sheet to the map -- honest about the outcome, not about how it should
-  eventually look.
+- **Win/lose popups themselves were built next** -- see the
+  `12-popups-fin-de-niveau.md` section below. `GameScreen._finishLevel`
+  now pushes the real `LevelWonPopup`/`LevelLostPopup` instead of a
+  placeholder dialog.
 - **Board-size/move-budget progression, biome/mission-type alternation**
   (`03-assets-de-jeu.md`'s own deferred note: "board size/shape
   progression from 7x7 up to 10x50 around level 1000, mandatory shape
@@ -1071,3 +1067,65 @@ the creator set for `09-carte-progression.md`):
 - Not run on a device or simulator from this environment, same caveat as
   every other screen in this app -- the gesture-arena reasoning above
   and the animation timings are worked through on paper, not watched.
+
+## End-of-level popups (`12-popups-fin-de-niveau.md`)
+
+`GameScreen._finishLevel` now pushes one of two real popups
+(`lib/screens/level_end_popups.dart`) instead of the placeholder
+`AlertDialog` from the `11-ecran-de-jeu.md` pass -- both on the same
+"verre dépoli mat façon velours" frosted card the mission sheet uses,
+via the same blur-scrim-over-whatever's-behind overlay pattern. The
+sticker-style outlined title ("Niveau N" on the mission sheet, "PERDU"/
+"GAGNÉ" here) got pulled out into a shared `StickerText` widget
+(`lib/widgets/sticker_text.dart`) rather than staying duplicated once a
+second screen needed it.
+
+**`LevelLostPopup`**: lives remaining, "C'est pas fini !", and two
+buttons plus a corner "X". "+5 mouvements gratuit !" is spec'd to need
+a 30-second-minimum video ad -- no ad SDK exists anywhere in this
+project (nothing in `pubspec.yaml`), so this is an honest stub
+(`ComingSoonScreen`) rather than a fake ad flow. "Rejouer" relaunches
+the level (fresh `GameScreen`, same mission and boost loadout, since
+the mission is deterministic per level number anyway) if lives remain,
+or redirects to the not-yet-built shop otherwise, per the spec's own
+branching rule. The "X" badge overlaps the card's bottom-left corner,
+per the reference mockup -- it has to be part of the card widget itself
+(`_withCloseButton`), not positioned by the outer scaffold: a
+`Positioned` there would anchor to the full-screen backdrop that
+actually sizes that outer `Stack`, not to the card floating centered
+inside it.
+
+**`LevelWonPopup`**: score, 1-3 stars, "Continuer", with fireworks
+behind the card. The score counts up via an `IntTween` under an
+`easeOutCubic` curve, paired with an `elasticOut` scale-in -- reading
+the spec's "incrémente par palier de 1 point" as *how* the animation
+moves (through whole integers, not a smoothly-interpolated fraction)
+rather than literally one point at a time, which would take minutes
+for the reference mockup's own "1,250,000". No real firework art
+exists (and photographic firework content isn't something to
+fabricate), so the fireworks are a small procedural `CustomPainter`
+effect instead -- a handful of staggered radiating-line bursts, same
+spirit as the progression map's twinkling night-sky stars or its
+contact shadows: a generated effect, not standing in for a missing
+photo.
+
+Every button here that leaves the popup (`X`, `Rejouer`, `Continuer`)
+goes through `LoadingTransitionOverlay`
+(`lib/widgets/loading_transition_overlay.dart`) via
+`Navigator.pushAndRemoveUntil`, discarding the whole mission-sheet/
+game-screen/popup stack in favor of a fresh destination screen (the
+map, or a new `GameScreen` for a replay) wrapped in that transition --
+matching the spec's own "animation de chargement" language for each of
+these. This is that widget's first real use anywhere in the app: it
+existed since `07-regles-globales-ui.md`, fully built, explicitly
+"pas encore wired into any navigation flow" until this pass gave it
+one, with 8 background variants to cycle through and a 2-second display
+cap already handled internally.
+
+Whether starting or losing a level spends a life is still undefined by
+any spec file reached so far -- `ApiClient.consumeLife()` still isn't
+called anywhere, same as noted in the `11-ecran-de-jeu.md` section.
+Lives shown here are just whatever was passed down from the map's last
+fetched `ProgressDTO`, unchanged for the whole session. Not run on a
+device or simulator from this environment, same caveat as everything
+else.

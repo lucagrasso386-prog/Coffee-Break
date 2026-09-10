@@ -8,6 +8,7 @@ import '../models/boost_power.dart';
 import '../models/level_map_node.dart';
 import '../models/level_mission.dart';
 import '../widgets/spring_button.dart';
+import '../widgets/sticker_text.dart';
 import 'game_screen.dart';
 
 /// 10-fiche-mission-niveau.md: the mission sheet shown when a level node
@@ -124,7 +125,7 @@ class _MissionCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _OutlinedTitle('Niveau ${node.number}'),
+          StickerText('Niveau ${node.number}', color: _brown),
           const SizedBox(height: 20),
           _MissionRow(mission: mission),
           const SizedBox(height: 20),
@@ -169,35 +170,6 @@ class _MissionCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Brown fill text with a white outline, mimicking the mockup's
-/// sticker-style title -- stacks 4 offset white copies behind the real
-/// text rather than relying on a stroke-only Paint (which Flutter doesn't
-/// blend cleanly with a separate fill pass at small sizes).
-class _OutlinedTitle extends StatelessWidget {
-  const _OutlinedTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    const style = TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: 1);
-    const offsets = [
-      Offset(-1.5, -1.5), Offset(1.5, -1.5), Offset(-1.5, 1.5), Offset(1.5, 1.5),
-      Offset(-1.5, 0), Offset(1.5, 0), Offset(0, -1.5), Offset(0, 1.5),
-    ];
-    return Stack(
-      children: [
-        for (final o in offsets)
-          Transform.translate(
-            offset: o,
-            child: Text(text, style: style.copyWith(color: Colors.white)),
-          ),
-        Text(text, style: style.copyWith(color: _MissionCard._brown)),
-      ],
     );
   }
 }

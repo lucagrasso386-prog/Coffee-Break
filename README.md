@@ -119,14 +119,26 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       and cascading gravity/refill, the moves counter, real-time mission
       progress, a star-dust bar (reasoned placeholder thresholds, no
       balancing data exists), the shuffle-when-blocked rule, and win/lose
-      detection with an honest (unanimated) result dialog. Deliberately
-      deferred, same "cœur d'abord" scoping as `09`: special pieces
-      (tourbillon, bombe aux éclats, rayée — matches just clear, no
-      creation or effects yet), obstacles and delivery objectives from
+      detection leading into `12`'s real popups. Deliberately deferred,
+      same "cœur d'abord" scoping as `09`: special pieces (tourbillon,
+      bombe aux éclats, rayée — matches just clear, no creation or
+      effects yet), obstacles and delivery objectives from
       `05-mecaniques-de-jeu.md` (every cell is a plain matchable element),
-      actually activating a selected boost, the 10-second hint glow, the
-      shuffle's own animation (it reshuffles instantly), the loading/
-      opening animation, and the real win/lose animations (star + score
-      reveal, the leftover-moves shooting-star bonus, the lost-level
-      animation — `12-popups-fin-de-niveau.md`). See `mobile/README.md`
-      for details. `12` onward not started yet.
+      actually activating a selected boost, the 10-second hint glow, and
+      the shuffle/loading animations (both happen instantly, no visible
+      transition). See `mobile/README.md` for details.
+- [x] `12-popups-fin-de-niveau.md` — the win/lose popups
+      (`mobile/lib/screens/level_end_popups.dart`), same frosted-glass
+      card style as the mission sheet. Lost popup: lives remaining,
+      "+5 mouvements gratuit" (an honest stub — no ad SDK is integrated
+      in this project), "Rejouer" (relaunches the level, or redirects to
+      the not-yet-built shop if out of lives), and a corner "X" back to
+      the map. Won popup: procedurally-animated fireworks (no real
+      firework art exists, so this is a generated effect rather than
+      fabricated photo content), a counting-up score, 1-3 stars, and
+      "Continuer" back to the map. Every one of these transitions wires
+      up `LoadingTransitionOverlay`
+      (`mobile/lib/widgets/loading_transition_overlay.dart`) for its
+      first real use — it existed since `07-regles-globales-ui.md` but
+      had never been used in a navigation flow until now. See
+      `mobile/README.md` for details. `13` onward not started yet.
