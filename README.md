@@ -91,11 +91,11 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       layout that adapts to the count. Every node and decor piece casts a
       contact shadow that scales with the same 3D projection, so items
       read as resting on the curved surface rather than pasted on top of
-      it. Decor scatter now has two real filler variants: a plumeria tree
-      (full day/golden/night set) and a palm tree (day/golden hour, night
-      pending). The landmark pool (the Coffee Bar building) and the rest
-      of the filler variety (hibiscus) are still pending. Day/night cycle
-      *for the level map itself*, the
+      it. Decor scatter now has two real filler variants, each with a
+      complete day/golden/night set: a plumeria tree and a palm tree. The
+      landmark pool (the Coffee Bar building) and the rest of the filler
+      variety (hibiscus) are still pending. Day/night cycle *for the level
+      map itself*, the
       biome swap every 10 levels, and infinite level generation past the
       first 1000 preloaded are still explicitly deferred. See
       `mobile/README.md` for details. `10` onward not started yet.

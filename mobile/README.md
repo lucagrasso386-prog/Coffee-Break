@@ -784,8 +784,8 @@ content as a pipeline bug, especially once the same pipeline has
 already proven clean everywhere else in the same image.
 
 Second filler variant is a palm tree ("palmier"), cut from the same
-magenta chroma-key family as the frangipanier, now with day and
-golden-hour versions (night still pending). Held up fine against the
+magenta/purple chroma-key family as the frangipanier and now with a
+complete day/golden/night set of its own too. Held up fine against the
 fern-like fronds' many thin, narrow leaflets -- each notch between
 leaflets could in principle starve the nearest-core-projection method
 of any real core pixels the way the plumeria's one small bud did, but

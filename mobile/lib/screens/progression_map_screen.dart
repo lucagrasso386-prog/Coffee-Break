@@ -49,8 +49,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   /// for both periods), the creator sends a genuinely distinct render per
   /// period for each piece -- same pose each time, but a different color
   /// grade -- so day/golden-hour/night each get their own asset rather
-  /// than sharing one. The palmier's night render doesn't exist yet, so
-  /// only day and golden hour have it so far.
+  /// than sharing one.
   static const List<DecorVariant> _fillerDay = [
     DecorVariant(
       assetName: 'assets/progression_map/frangipanier_day.png',
@@ -80,6 +79,11 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
       assetName: 'assets/progression_map/frangipanier_night.png',
       category: DecorCategory.filler,
       baseScale: 1.2,
+    ),
+    DecorVariant(
+      assetName: 'assets/progression_map/palmier_night.png',
+      category: DecorCategory.filler,
+      baseScale: 1.3,
     ),
   ];
   static const Map<DayNightPeriod, List<DecorVariant>> _fillerPoolByPeriod = {
