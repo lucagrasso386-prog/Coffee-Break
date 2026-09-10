@@ -776,10 +776,11 @@ out not to be a cutout defect at all -- a good amount of time went
 into treating it like the alpha-estimation bug above (checking core
 coverage and edge thickness right at that flower) before the creator
 caught their own mistake and clarified it was a mark on their day
-source image itself, then sent a corrected day render. Re-cut just the
-day variant against the new source; golden and night still carry
-whatever the original renders had there until (if) the creator sends
-matching fixes for those too. Worth remembering: a localized, oddly-
+source image itself, then sent a corrected day render. Re-cut the day variant
+against the new source, then the golden-hour one once the creator sent
+its own corrected render too; night still carries whatever the
+original render had there until (if) the creator sends a matching fix
+for it. Worth remembering: a localized, oddly-
 shaped defect isolated to one small feature is at least as likely to be
 bad source content as a pipeline bug, especially once the same
 pipeline has already proven clean everywhere else in the same image.
