@@ -705,10 +705,34 @@ which should read as a fixed marker rather than scattered filler. Decor
 pieces project through the same `CylinderProjection` as level nodes and
 get depth-sorted into the same draw order, so a close decor piece
 correctly overlaps a farther level button (or a farther decor piece) and
-vice versa. Both pools are still empty (`fillerPool: []`, `landmarkPool: []`
-in `_ProgressionMapScreenState`) -- registering a `DecorVariant` per asset
-once the creator sends them is the only wiring left; nothing else about
-the scatter or the scroll needs to change.
+vice versa. The filler pool has its first real variant now (see below);
+the landmark pool (the Coffee Bar building) is still empty -- registering
+a `DecorVariant` per asset once the creator sends them is the only
+wiring left; nothing else about the scatter or the scroll needs to
+change.
+
+First filler variant in is a plumeria tree ("frangipanier"), day/
+golden-hour only for now (`assets/progression_map/frangipanier_day.png`)
+-- same day-reused-for-golden-hour, night-still-empty pattern as the
+level buttons, and for the same reason: a daytime-lit tree under a
+night sky would look wrong, and there's no night version of this asset
+yet. `_decorScatter` moved from a `static const` to a `late final` set
+in `initState` so its filler pool can be picked per `_period`, the same
+way `_cloudAssets` already was.
+
+This cutout's background (flat magenta, crisp edges) posed no real
+challenge on its own, but its subject did: a full tree canopy has
+several genuine gaps between overlapping leaves where the background
+shows through, not just noise. The usual size-gated hole-fill (fill
+small holes, leave large ones open) still applies, but the size cutoff
+needed rethinking for this image specifically -- checking the actual
+hole sizes first showed every true noise artifact here was a single
+stray pixel, while the two real gaps in the canopy ran into the
+thousands of pixels, so the fill threshold got set far tighter (80px)
+than the compass-ring-style cutouts that motivated the technique
+originally. Worth checking per image rather than assuming the same
+threshold always applies -- a leafy silhouette and a metal ring don't
+fail the same way.
 
 Every node and decor piece also casts a contact shadow now -- the
 creator asked directly how the scroll would actually read as "resting

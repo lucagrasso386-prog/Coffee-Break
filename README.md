@@ -88,9 +88,13 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       validated glow noticeably brighter than day's and no night button
       art exists yet to show that. The 1-3 star rating above validated
       nodes is real art too, one star asset reused at 3 sizes with a
-      layout that adapts to the count. Decor scatter (palm trees, hibiscus,
-      plumeria, the Coffee Bar building) is still empty pools, ready for
-      variants once sent. Day/night cycle *for the level map itself*, the
+      layout that adapts to the count. Every node and decor piece casts a
+      contact shadow that scales with the same 3D projection, so items
+      read as resting on the curved surface rather than pasted on top of
+      it. Decor scatter has its first real filler variant (a plumeria
+      tree, day/golden hour) with the landmark pool (the Coffee Bar
+      building) and the rest of the filler variety (palm trees, hibiscus)
+      still pending. Day/night cycle *for the level map itself*, the
       biome swap every 10 levels, and infinite level generation past the
       first 1000 preloaded are still explicitly deferred. See
       `mobile/README.md` for details. `10` onward not started yet.

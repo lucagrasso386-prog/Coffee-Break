@@ -45,14 +45,29 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   // just under its owner's so it always draws immediately behind it.
   static const double _shadowSortEpsilon = 0.0001;
 
-  /// Empty pools until the creator's decor art is in -- registering a
-  /// variant here is the only wiring `DecorScatter` needs to start
-  /// placing it (see mobile/README.md, 09-carte-progression.md section).
-  static const DecorScatter _decorScatter = DecorScatter(
-    fillerPool: [],
-    landmarkPool: [],
-    anglePerLevel: _anglePerLevel,
-  );
+  /// Filler decor, day/golden-hour only so far -- same "jour et golden
+  /// hour c'est les meme" reuse as the level buttons. Night stays an
+  /// empty pool rather than showing a daytime-lit tree under a night
+  /// sky, same reasoning as the buttons staying on their placeholder at
+  /// night: better nothing than a wrong-looking "final" result.
+  static const List<DecorVariant> _fillerDay = [
+    DecorVariant(
+      assetName: 'assets/progression_map/frangipanier_day.png',
+      category: DecorCategory.filler,
+      baseScale: 1.2,
+    ),
+  ];
+  static const Map<DayNightPeriod, List<DecorVariant>> _fillerPoolByPeriod = {
+    DayNightPeriod.day: _fillerDay,
+    DayNightPeriod.goldenHour: _fillerDay,
+    DayNightPeriod.night: [],
+  };
+
+  /// Landmark pool (the Coffee Bar building) stays empty until that art
+  /// exists -- registering a variant here is the only wiring
+  /// `DecorScatter` needs to start placing it (see mobile/README.md,
+  /// 09-carte-progression.md section).
+  late final DecorScatter _decorScatter;
 
   late final AnimationController _flingController;
   double _rotation = 0;
@@ -126,6 +141,11 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
     _skyAsset = _skyByPeriod[_period]!;
     _cloudCount = _period == DayNightPeriod.night ? 0 : CloudSchedule.countFor();
     _cloudAssets = _cloudAssetsByPeriod[_period] ?? const [];
+    _decorScatter = DecorScatter(
+      fillerPool: _fillerPoolByPeriod[_period] ?? const [],
+      landmarkPool: const [],
+      anglePerLevel: _anglePerLevel,
+    );
     _flingController = AnimationController.unbounded(vsync: this)
       ..addListener(() {
         setState(() {
