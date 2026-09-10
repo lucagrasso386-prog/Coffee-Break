@@ -818,6 +818,30 @@ cutouts have the same narrow-transition trait underneath but read fine
 without it, so they were left as they are rather than reprocessed on
 spec.
 
+That still wasn't the whole story: the creator zoomed into the pushed
+result and pointed at real leftover magenta/pink specks, still visible
+scattered through the fronds. This was a second, different bug from
+the jagged edges -- some of the tiny (10-30px) genuine gaps between
+overlapping leaflets were getting swept up by this file's usual
+size-gated hole-fill (meant to patch single-pixel JPEG noise, not real
+gaps) and baked in as solid, wrong-colored patches once erosion
+happened to leave part of a filled gap untouched deep inside a wide
+part of a frond. Tightening the fill-size cutoff alone wasn't reliable
+either -- the real gaps here range continuously from a few px up to
+~30px with no clean size gap from true noise to separate them by
+threshold. Fixed properly with a ground-truth check instead of a size
+guess: a pixel is only ever allowed full ("core") opacity if its own
+raw color actually differs from the background past the same distance
+threshold (40) that defined the silhouette in the first place, no
+matter how deep inside the hole-filled shape erosion placed it, and
+the same pixels get their non-core alpha capped low too rather than
+picking up a partial tint from a nearby filled micro-hole's edge. Cut
+the visible speck count by roughly 8-10x on the two magenta-background
+periods (day, golden); night, on a different purple background, had
+none to begin with. What's left is a handful of single-pixel specks
+invisible at anything but 5x zoom -- reasonable to leave rather than
+chase further.
+
 Every node and decor piece also casts a contact shadow now -- the
 creator asked directly how the scroll would actually read as "resting
 on a curved surface" rather than flat stickers pasted over it.
