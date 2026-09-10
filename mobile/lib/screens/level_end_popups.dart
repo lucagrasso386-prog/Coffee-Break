@@ -12,6 +12,7 @@ import '../widgets/spring_button.dart';
 import '../widgets/sticker_text.dart';
 import 'game_screen.dart';
 import 'progression_map_screen.dart';
+import 'shop_screen.dart';
 
 /// 12-popups-fin-de-niveau.md: the two end-of-level popups (lost/won),
 /// pushed from `GameScreen._finishLevel`. Same "verre dépoli mat façon
@@ -163,11 +164,7 @@ class LevelLostPopup extends StatelessWidget {
     // "Si plus aucune vie -> le bouton redirige vers la première page de
     // la boutique (ne relance pas de partie)."
     if (livesRemaining != null && livesRemaining! <= 0) {
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => const ComingSoonScreen(
-          message: "Plus de vies -- la boutique (14-boutique.md) n'est pas encore construite.",
-        ),
-      ));
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ShopScreen()));
       return;
     }
     _goTo(

@@ -153,4 +153,17 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       state and the premium column are honest placeholders (no backend
       persistence, no subscription system yet). See `mobile/README.md`
       for details, including a documented interpretation call on the
-      pill-marker-vs-fill-gauge question. `14` onward not started yet.
+      pill-marker-vs-fill-gauge question.
+- [x] `14-boutique.md` — the shop (`mobile/lib/screens/shop_screen.dart`),
+      reached from the map's shop HUD icon and from the lost popup's
+      "Rejouer" when out of lives. Three real-money starter packs, four
+      in-game-coin temporary boosts revealed by "VOIR PLUS," and a
+      separate coin-only-packs screen ("Retour" back to the main shop) —
+      no back button anywhere, swipe left/right only. Every priced button
+      is an honest stub: no IAP plugin is wired into the app, and the
+      backend's receipt validation still has no product catalog to credit
+      against. See `mobile/README.md` for details, including one
+      unconfirmed interpretation call (a treasure-chest banner with no
+      listed price, read as a link into the coin-packs screen) and the
+      reused-coin-icon and plain-glyph decisions for items with no
+      dedicated art. `15` onward not started yet.

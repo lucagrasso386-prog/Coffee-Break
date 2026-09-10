@@ -1193,3 +1193,71 @@ widget must sit directly under a `Stack` with nothing but Stateless/
 StatefulWidgets in between it and that `Stack`; `IgnorePointer` (used to
 make the claim overlay click-through) is itself a RenderObjectWidget,
 so it has to wrap the `Positioned`'s *child*, not the other way around.
+
+## Shop (`14-boutique.md`)
+
+`ShopScreen` (`lib/screens/shop_screen.dart`) is now the real destination
+for the map's shop HUD icon (`onShop`, previously a stub) and for the
+lost popup's "Rejouer" when out of lives (`level_end_popups.dart`'s
+`_replay`, same swap). Same no-back-button rule as the rewards screen:
+`PopScope(canPop: false)` plus a horizontal swipe to leave
+(`lib/models/shop_catalog.dart` holds all the static offer data).
+
+**14.1 — 3 starter packs**: each row's icons follow the reference
+mockup's own art rather than the spec text (which calls both pack 1's
+and pack 2's coffee item just "café") — pack 1 draws the to-go cup
+(`Boost.cafeAEmporter`), pack 2 draws the mug with heart latte art
+(`Boost.cafeLatte`). No "money bag" or "treasure chest" asset exists for
+the bigger coin rewards on packs 2 and 3's right side, so both reuse the
+one real coin sprite (`Currency.coinCafe`) at the same size, differing
+only by the printed number — same reasoning as `reward_tier.dart`'s
+identical choice. Pack 3's left side is a cluster of 6 small grants
+instead of one icon: 3 already-real boost/HUD assets (`cafeAEmporter`,
+`jusOrange`, `cafeLatte`, and `hud_heart.png` for "1 vie"), plus two
+("boost chrono", "boost infini") that have no dedicated art and no
+gameplay definition in any spec file reached so far — the mockup itself
+renders those two as plain stopwatch/infinity glyphs rather than
+commissioned art, so this reuses that same plain-glyph treatment
+(⏱️/♾️ text) instead of inventing new art or a new mechanic.
+
+**"VOIR PLUS"**: hides itself and reveals 14.2's 4 rows below on tap,
+per the spec's "disparaît au clic et révèle la suite de la page vers le
+bas." All 4 temporary boosts (`tempBoostOffers`) cost 2000 coins for 1h,
+distinguished visually with a green price pill instead of 14.1's pink,
+matching the mockup's own color split between "real money" and "in-game
+coins" purchases. "Outis surprise" is reproduced verbatim, matching a
+typo present in both the spec text and the mockup image — almost
+certainly meant to be "Outils", flagged here rather than silently
+corrected.
+
+**The 20 000 chest row**: the bottom of 14.2's mockup shows a
+treasure-chest icon and "20 000" with no price and no label, and isn't
+one of the 4 offers the spec text actually lists. Read here as a banner
+into 14.3 (tapping it pushes the coin-packs screen) rather than a 5th
+temporary boost, since it visually matches 14.3's own biggest tier —
+**not confirmed with the creator**, flagging in case the real intent was
+something else (a coin-balance display, for instance).
+
+**14.3 — coin-only packs**: its own screen (`_CoinPacksScreen`, private
+to `shop_screen.dart`) rather than more of the same scroll, per the
+spec's own "Bouton Retour : revient à la boutique principale" implying
+a separate place to return *from*. Cyan-bordered price pills, matching
+the mockup's third distinct color. Same single-coin-sprite reuse as
+14.1 for every row.
+
+**Every priced button — all three sections — is an honest
+`ComingSoonScreen` stub**, not a payment flow that can't actually
+complete: no IAP plugin exists anywhere in `pubspec.yaml`
+(`in_app_purchase` or otherwise), and the backend's
+`POST /iap/validate-receipt` (`backend/src/routes/iap.ts`) still can't
+verify a real Apple/Google receipt or credit a product — it's already
+flagged there with a `TODO` for exactly this catalog. The Apple/Google
+loot-box probability-disclosure requirement for "Bonus surprise"/"Outils
+surprise" (`docs/SETUP.md` step 5) is a **store-listing** obligation,
+not something this screen can satisfy in-app — nothing here fabricates
+percentages for content that doesn't have a defined reward pool yet.
+
+Deliberately deferred: actually spending coins or crediting a purchase
+(no backend product catalog yet); the temporary boosts' real gameplay
+effects; real payment of any kind. Not run on a device or simulator
+from this environment, same caveat as everything else.
