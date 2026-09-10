@@ -711,34 +711,64 @@ a `DecorVariant` per asset once the creator sends them is the only
 wiring left; nothing else about the scatter or the scroll needs to
 change.
 
-First filler variant in is a plumeria tree ("frangipanier"), day/
-golden-hour only for now. Unlike the level buttons, which reuse one
-asset set as-is for both periods, the creator sent a genuinely distinct
-golden-hour render for this piece -- same pose, visibly warmer-graded
--- so `assets/progression_map/frangipanier_day.png` and
-`frangipanier_golden.png` are two separate cutouts, each pulled against
-its own source's background color (the golden version's magenta
-backdrop itself reads warmer, ~(242,42,148) vs. the day version's
-~(212,14,155), consistent with a color grade applied to the whole
-render rather than just the tree). Night still stays an empty pool --
-no night art exists yet, and a daytime/golden-lit tree under a night
-sky would look wrong. `_decorScatter` moved from a `static const` to a
-`late final` set in `initState` so its filler pool can be picked per
-`_period`, the same way `_cloudAssets` already was.
+First filler variant in is a plumeria tree ("frangipanier"), now with
+a complete day/golden-hour/night set. Unlike the level buttons, which
+reuse one asset set as-is for day and golden hour, the creator sent a
+genuinely distinct render per period for this piece -- same pose every
+time, but each on its own color-graded background (day's magenta reads
+~(212,14,155), golden's the same hue but warmer at ~(242,42,148),
+night's a cooler purple at ~(133,0,141)) -- so all three are separate
+cutouts rather than any period reusing another's asset.
+`assets/progression_map/frangipanier_{day,golden,night}.png`,
+registered in their own `_fillerDay`/`_fillerGolden`/`_fillerNight`
+lists. `_decorScatter` moved from a `static const` to a `late final`
+set in `initState` so its filler pool can be picked per `_period`, the
+same way `_cloudAssets` already was.
 
-This cutout's background (flat magenta, crisp edges) posed no real
-challenge on its own, but its subject did: a full tree canopy has
-several genuine gaps between overlapping leaves where the background
-shows through, not just noise. The usual size-gated hole-fill (fill
-small holes, leave large ones open) still applies, but the size cutoff
-needed rethinking for this image specifically -- checking the actual
-hole sizes first showed every true noise artifact here was a single
-stray pixel, while the two real gaps in the canopy ran into the
-thousands of pixels, so the fill threshold got set far tighter (80px)
-than the compass-ring-style cutouts that motivated the technique
-originally. Worth checking per image rather than assuming the same
-threshold always applies -- a leafy silhouette and a metal ring don't
-fail the same way.
+This cutout's background (flat magenta/purple, crisp edges) posed no
+real challenge on its own, but its subject did, in two different ways.
+First: a full tree canopy has several genuine gaps between overlapping
+leaves where the background shows through, not just noise. The usual
+size-gated hole-fill (fill small holes, leave large ones open) still
+applies, but the size cutoff needed rethinking for this image
+specifically -- checking the actual hole sizes first showed every true
+noise artifact here was a single stray pixel, while the two real gaps
+in the canopy ran into the thousands of pixels, so the fill threshold
+got set far tighter (80px) than the compass-ring-style cutouts that
+motivated the technique originally. Worth checking per image rather
+than assuming the same threshold always applies -- a leafy silhouette
+and a metal ring don't fail the same way.
+
+Second, a subtler one that shipped unnoticed in the first version of
+all three cutouts, until a zoomed-in look at the night render's petal
+edges (prompted by nothing more than double-checking before calling it
+done) caught a thin but real magenta/purple fringe tracing every
+petal and leaf boundary -- present in the already-pushed day and
+golden versions too once checked, just easier to miss against their
+own warmer palettes. Root cause: this file's usual edge alpha (a
+smoothstep between two fixed color-distance thresholds, tuned once
+against saturated button/star colors) assumes every material reaches
+"fully opaque" around the same raw color-distance from the background.
+That's false for a pale white petal on a saturated magenta backdrop --
+white sits ~264 color-distance units from that background at true full
+opacity, while the tree's dark trunk brown sits only ~140-160 away even
+at its own true full opacity. One fixed HI threshold can't be correct
+for both: calibrated low enough for the trunk, it reads a petal edge as
+"fully opaque" at barely 40% real coverage, baking in a visible
+half-background color. Fixed by dropping the fixed-threshold model
+entirely in favor of a local one: erode the already-reliable silhouette
+shape (not a color cutoff) to get a safely-interior "core", then for
+every edge pixel find its *nearest* core pixel and use that pixel's own
+color as the local fully-opaque reference -- solving alpha by
+projecting the edge pixel's offset from the background onto that local
+background-to-foreground axis, instead of comparing against one global
+constant. Adapts per-region automatically (dark trunk and pale petal
+each get their own correct reference) rather than needing a hand-tuned
+threshold per material. Worth reusing this approach directly if a
+future cutout mixes very pale and very saturated/dark colors in the
+same image against one saturated backdrop -- the button and star
+cutouts never hit this because their colors were all in a narrower,
+more uniform saturation range.
 
 Every node and decor piece also casts a contact shadow now -- the
 creator asked directly how the scroll would actually read as "resting

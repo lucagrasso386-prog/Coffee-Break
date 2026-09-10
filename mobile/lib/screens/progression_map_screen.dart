@@ -45,14 +45,11 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   // just under its owner's so it always draws immediately behind it.
   static const double _shadowSortEpsilon = 0.0001;
 
-  /// Filler decor, day/golden-hour only so far. Unlike the level buttons
-  /// (one asset set reused as-is for both periods), the creator sent a
-  /// distinct golden-hour render for this piece -- same pose, but
-  /// visibly warmer-graded than the day version -- so each period gets
-  /// its own asset rather than sharing one. Night stays an empty pool
-  /// rather than showing a daytime-lit tree under a night sky, same
-  /// reasoning as the buttons staying on their placeholder at night:
-  /// better nothing than a wrong-looking "final" result.
+  /// Filler decor. Unlike the level buttons (one asset set reused as-is
+  /// for both periods), the creator sent a genuinely distinct render per
+  /// period for this piece -- same pose each time, but a different color
+  /// grade -- so day/golden-hour/night each get their own asset rather
+  /// than sharing one.
   static const List<DecorVariant> _fillerDay = [
     DecorVariant(
       assetName: 'assets/progression_map/frangipanier_day.png',
@@ -67,10 +64,17 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
       baseScale: 1.2,
     ),
   ];
+  static const List<DecorVariant> _fillerNight = [
+    DecorVariant(
+      assetName: 'assets/progression_map/frangipanier_night.png',
+      category: DecorCategory.filler,
+      baseScale: 1.2,
+    ),
+  ];
   static const Map<DayNightPeriod, List<DecorVariant>> _fillerPoolByPeriod = {
     DayNightPeriod.day: _fillerDay,
     DayNightPeriod.goldenHour: _fillerGolden,
-    DayNightPeriod.night: [],
+    DayNightPeriod.night: _fillerNight,
   };
 
   /// Landmark pool (the Coffee Bar building) stays empty until that art
