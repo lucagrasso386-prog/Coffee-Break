@@ -1,17 +1,17 @@
 import 'boost.dart';
 
 /// Up to this many boosts can be equipped for a level, chosen on the
-/// mission sheet before play starts (`10-fiche-mission-niveau.md`, not
-/// built yet). Not enforced anywhere yet -- there's no mission sheet
-/// screen or loadout state to enforce it in.
+/// mission sheet before play starts (`10-fiche-mission-niveau.md`) --
+/// now enforced there (`LevelMissionScreen._toggleBoost`).
 const int maxEquippedBoosts = 5;
 
 /// How the player targets a boost when activating it, per
 /// 06-pouvoirs-des-bonus.md. The actual targeting UI (tapping a column,
 /// tapping a board element, the off-board destination wheel for jus
-/// d'orange) doesn't exist yet -- that's screen/interaction work for
-/// 11-ecran-de-jeu.md. This only captures which shape of input each boost
-/// needs once that screen exists.
+/// d'orange) still doesn't exist -- 11-ecran-de-jeu.md's board is built,
+/// but activating an equipped boost in-level is explicitly deferred
+/// (see mobile/README.md). This only captures which shape of input each
+/// boost needs once that lands.
 enum BoostTargeting {
   /// Player taps a column; no element/type selection.
   column,

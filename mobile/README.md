@@ -203,15 +203,15 @@ get right, not just copy blindly across all four:
   (chantilly, sac de café).
 - `lib/models/special_piece.dart`, `obstacle.dart`, `delivery_objective.dart`
   — static data only (asset paths, hit counts, unlock levels, creation/effect
-  descriptions as text). No match-3 board engine exists yet to actually
-  detect alignments or apply these effects — that's `11-ecran-de-jeu.md`.
-- **Not modeled yet, deferred to later spec files**: the actual board/grid
-  engine and match detection; level generation (board size/shape progression
-  from 7x7 up to 10x50 around level 1000, mandatory shape variety and
-  mission-type alternation between consecutive levels, the environment theme
-  changing every 10 levels, pre-loading the first 1000 levels) — this
-  depends on `09-carte-progression.md`, `10-fiche-mission-niveau.md`, and
-  `11-ecran-de-jeu.md`, none of which exist yet.
+  descriptions as text). The match-3 board engine exists now
+  (`11-ecran-de-jeu.md`, `lib/models/game_board.dart`), but it doesn't
+  detect these alignment patterns, place obstacles, or run delivery-style
+  travel yet — deliberately deferred (see that section below).
+- **Still not modeled, deferred further**: level generation (board
+  size/shape progression from 7x7 up to 10x50 around level 1000, mandatory
+  shape variety and mission-type alternation between consecutive levels,
+  the environment theme changing every 10 levels, pre-loading the first
+  1000 levels) — no real balancing data exists yet to build this from.
 
 **Note on rayée's orientation-to-effect mapping**: the spec doesn't say
 which stripe orientation clears a row vs. a column, only that a horizontal
@@ -954,3 +954,120 @@ actual device or simulator from this environment -- the layering
 (`BackdropFilter` + two nested `GestureDetector`s for
 dismiss-vs-swallow), the outlined-title stacking trick, and the
 pressed-pill look are reasoned through, not visually confirmed.
+
+## Game screen (`11-ecran-de-jeu.md`) — core engine in, the rest deferred
+
+"JOUER" on the mission sheet now leads into a real match-3 board
+instead of the old stub. This is the biggest single feature built in
+this project so far by a wide margin, so it got the same treatment the
+progression map did: build the core engine for real, defer everything
+around it with an honest stand-in rather than half-building the whole
+spec across the board.
+
+**What's built:**
+
+- `lib/models/game_board.dart` (`GameBoard`) -- pure Dart, no Flutter
+  dependency, so it's the one piece of this file worth unit-testing
+  directly if tests get added later. Generates a 7x7 grid (see below)
+  guaranteed to open with no pre-existing match and at least one legal
+  move; validates a swap by actually trying it and checking for a match
+  rather than special-casing adjacency math, reverting if none; resolves
+  a full cascade (clear → collapse each column (with new pieces falling
+  from the top, not conjured mid-column) → re-check → repeat) in one
+  call, returning per-element counts for the mission tracker and a total
+  for star-dust; and reshuffles the *existing* pieces (not fresh random
+  ones) into a new match-free, at-least-one-legal-move arrangement for
+  "plateau bloqué." `hasAnyValidMove` is the brute-force "try every
+  adjacent pair, check, revert" approach -- perfectly fine at these
+  board sizes, would need a smarter approach at 10x50 (see below).
+- `lib/screens/game_screen.dart` (`GameScreen`) -- the board rendered on
+  a translucent glass panel (the same visual language as the mission
+  sheet's card, without its own blur since there's no previous screen to
+  blur through here), both input methods from the spec (tap a cell then
+  an adjacent one, or drag), the top HUD (moves / star bar + mission
+  icon+counter / lives) and bottom HUD (selected boosts row) from the
+  spec's own layout, real-time mission progress (updates the moment a
+  cascade resolves, just without the "element flies to the counter"
+  animation), the star-dust bar, shuffle-when-blocked, and win/lose
+  detection.
+
+**Reasoned-not-measured numbers**, since the spec gives exactly one
+calibrated example and nothing else: 7x7 board and 25 starting moves
+both come straight from the spec's own "les chiffres visibles sur cet
+exemple sont les valeurs réelles d'un niveau facile" -- reused for
+every level since there's no board-size or move-budget curve to scale
+them by. Star-dust is 1 point per cleared piece plus a flat
+`3 × mouvements restants` bonus at victory (standing in for the
+"étoile filante par mouvement restant" mechanic's score contribution,
+without its animation), against thresholds anchored to the mission's
+own total target count (`missionTotal`, `×1.5`, `×2` for 1/2/3
+stars) -- there's no real balancing data behind any of this, and it's
+written to be trivially retunable once there is.
+
+**Deliberately deferred** (same "cœur d'abord, reste en suivi" scoping
+the creator set for `09-carte-progression.md`):
+
+- **Special pieces** (tourbillon, bombe aux éclats, rayée --
+  `special_piece.dart`, from `05-mecaniques-de-jeu.md`). A 4/5-in-a-row
+  or T/L match just clears normally right now; detecting the pattern and
+  spawning/triggering the piece is real work layered on top of the
+  match-finder that exists, not started.
+- **Obstacles and delivery objectives** (`obstacle.dart`,
+  `delivery_objective.dart`). Every board cell is a plain `GameElement`
+  -- no vitrine/caramel/cookie/macaron blocking a cell, no chantilly/sac
+  de café traveling down the board by gravity.
+- **Boost activation.** The bottom HUD displays the loadout chosen on
+  the mission sheet but tapping one does nothing -- the 5 different
+  targeting UIs from `06-pouvoirs-des-bonus.md` (`BoostTargeting`: tap a
+  column, tap an element, tap to pick a type, no target, source-then-
+  off-board-destination) don't exist yet. Moot right now anyway since
+  every boost quantity is still 0 (`10-fiche-mission-niveau.md`'s
+  `BoostInventory` placeholder).
+- **The 10-second hint glow** ("aide au joueur"). Not implemented --
+  the board never highlights a possible match on its own.
+- **The shuffle's own animation.** `shuffleUntilPlayable()` runs
+  instantly and silently; the spec's "tous les éléments se mélangent
+  puis se replacent" implies a visible shuffle animation that doesn't
+  exist yet.
+- **Loading/opening animation.** Explicitly "prévue mais pas encore
+  réalisée" in the spec itself -- the board is simply already in place
+  when the screen opens, matching that.
+- **The real win/lose animations.** The spec is explicit these aren't
+  built yet either ("pas encore réalisée," both for victory's star+score
+  reveal and for the lost-level animation -- see
+  `12-popups-fin-de-niveau.md`). Right now, winning or losing shows a
+  plain `AlertDialog` reporting the real result (stars earned, total
+  star-dust, or "out of moves") before popping back through the mission
+  sheet to the map -- honest about the outcome, not about how it should
+  eventually look.
+- **Board-size/move-budget progression, biome/mission-type alternation**
+  (`03-assets-de-jeu.md`'s own deferred note: "board size/shape
+  progression from 7x7 up to 10x50 around level 1000, mandatory shape
+  variety and mission-type alternation between consecutive levels").
+  Still no data to build this from.
+- **Whether starting a level spends a life.** `ApiClient.consumeLife()`
+  exists but is still never called anywhere -- no spec file has said
+  when it should fire.
+
+**Implementation notes worth flagging:**
+
+- The board is a hand-rolled `Column` of `Row`s, not a `GridView` --
+  `GridView`'s `Scrollable` still participates in the gesture arena even
+  with `NeverScrollableScrollPhysics` (that disables scrolling, not
+  arena participation), which would have fought each cell's own drag
+  detector, especially for vertical swipes. Nothing here needs scrolling
+  or lazy building anyway at a fixed 7x7 size.
+- The "effet de rebond" on an invalid swap is a squash/spring *scale*
+  punch on the two involved cells (one shared `AnimationController` for
+  the whole board, since only one bounce plays at a time), not the two
+  cells actually sliding toward each other and back -- simpler to get
+  right, and still a clear "no" as feedback. Likewise, a cascade's
+  clears/refills currently just pop into their new state; pieces don't
+  visually fall tile-by-tile. Both are candidates for a later animation
+  pass, not correctness gaps.
+- No dedicated "table de jeu" background art exists -- the screen reuses
+  the real home-screen background (day/golden/night aware, same as
+  everywhere else) rather than inventing a new photo.
+- Not run on a device or simulator from this environment, same caveat as
+  every other screen in this app -- the gesture-arena reasoning above
+  and the animation timings are worked through on paper, not watched.

@@ -1,11 +1,13 @@
 /// The 3 special pieces created by aligning matchable elements, per
 /// 05-mecaniques-de-jeu.md. Animations are all under 1 second.
 ///
-/// Detecting which alignment pattern the player made and actually applying
-/// the effect (bursts, line clears, 3x3 explosions) needs the match-3 board
-/// engine, which doesn't exist yet -- that lands with the board/gameplay
-/// code once 11-ecran-de-jeu.md is processed. This only captures the static
-/// data: what creates each piece, its asset, and what it does in words.
+/// The match-3 board engine exists now (11-ecran-de-jeu.md,
+/// `lib/models/game_board.dart`), but it doesn't detect these alignment
+/// patterns or apply their effects yet (bursts, line clears, 3x3
+/// explosions) -- a 4/5-in-a-row or T/L match just clears normally for
+/// now, deliberately deferred alongside obstacles and boost activation
+/// (see mobile/README.md). This only captures the static data: what
+/// creates each piece, its asset, and what it does in words.
 enum SpecialPiece {
   tourbillon,
   bombeEclats,

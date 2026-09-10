@@ -4,8 +4,11 @@
 /// their path. A level can use either object alone or both at once for
 /// extra difficulty.
 ///
-/// This only models the two deliverable objects and their assets; the
-/// travel/gravity logic depends on the board engine (11-ecran-de-jeu.md).
+/// This only models the two deliverable objects and their assets. The
+/// board engine exists now (11-ecran-de-jeu.md,
+/// `lib/models/game_board.dart`), but delivery-style travel down the
+/// board is deliberately deferred (see mobile/README.md) -- every cell
+/// is still a plain `GameElement`.
 enum DeliveryObjective {
   chantilly,
   sacDeCafe;

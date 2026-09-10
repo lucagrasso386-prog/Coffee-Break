@@ -2,8 +2,10 @@
 /// planned for any of them -- players learn by playing.
 ///
 /// This only models the static data (unlock level, hit counts, asset per
-/// state) needed once the board engine exists; it doesn't implement board
-/// placement or match detection, which depend on 11-ecran-de-jeu.md.
+/// state). The board engine exists now (11-ecran-de-jeu.md,
+/// `lib/models/game_board.dart`), but every cell is still a plain
+/// `GameElement` -- obstacle placement and hit-handling on the board
+/// itself are deliberately deferred (see mobile/README.md).
 enum ObstacleKind {
   vitrineVerre,
   caramel,

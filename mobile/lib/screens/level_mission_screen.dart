@@ -7,8 +7,8 @@ import '../models/boost_inventory.dart';
 import '../models/boost_power.dart';
 import '../models/level_map_node.dart';
 import '../models/level_mission.dart';
-import '../widgets/coming_soon_screen.dart';
 import '../widgets/spring_button.dart';
+import 'game_screen.dart';
 
 /// 10-fiche-mission-niveau.md: the mission sheet shown when a level node
 /// on the progression map is tapped. Per the spec it's an overlay *in
@@ -17,9 +17,10 @@ import '../widgets/spring_button.dart';
 /// (see `_openLevel` in progression_map_screen.dart) so the map stays
 /// mounted and visible, blurred and dimmed, behind this.
 class LevelMissionScreen extends StatefulWidget {
-  const LevelMissionScreen({super.key, required this.node});
+  const LevelMissionScreen({super.key, required this.node, this.livesRemaining});
 
   final LevelMapNode node;
+  final int? livesRemaining;
 
   @override
   State<LevelMissionScreen> createState() => _LevelMissionScreenState();
@@ -40,9 +41,16 @@ class _LevelMissionScreenState extends State<LevelMissionScreen> {
   }
 
   void _play() {
+    // Whether starting a level spends a life isn't specified by any spec
+    // file reached so far (ApiClient.consumeLife exists but "the trigger
+    // -- level start vs. loss -- isn't defined until later spec files");
+    // not calling it here rather than guessing the rule.
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ComingSoonScreen(
-        message: 'Le niveau ${widget.node.number} arrive avec 11-ecran-de-jeu.md.',
+      builder: (_) => GameScreen(
+        node: widget.node,
+        mission: _mission,
+        selectedBoosts: _selected,
+        livesRemaining: widget.livesRemaining,
       ),
     ));
   }

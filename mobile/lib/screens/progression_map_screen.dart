@@ -292,7 +292,7 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
       transitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (_, animation, __) => FadeTransition(
         opacity: animation,
-        child: LevelMissionScreen(node: node),
+        child: LevelMissionScreen(node: node, livesRemaining: _progress?.lives),
       ),
     ));
   }

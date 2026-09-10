@@ -110,6 +110,23 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       backend inventory, no way to earn a boost (`14-boutique.md`) or
       spend one (`11-ecran-de-jeu.md`) yet — so every boost currently
       shows dimmed/unselectable rather than an invented number. "JOUER"
-      leads to the same `11-ecran-de-jeu.md` stub the level button itself
-      used to. See `mobile/README.md` for details. `11` onward not
-      started yet.
+      now leads into the real game screen below. See `mobile/README.md`
+      for details.
+- [ ] `11-ecran-de-jeu.md` — **core engine in, the rest deferred**: the
+      match-3 board itself (`mobile/lib/models/game_board.dart` +
+      `mobile/lib/screens/game_screen.dart`). Working: the 7x7 grid, tap
+      or drag swap with bounce-back on an invalid swap, match detection
+      and cascading gravity/refill, the moves counter, real-time mission
+      progress, a star-dust bar (reasoned placeholder thresholds, no
+      balancing data exists), the shuffle-when-blocked rule, and win/lose
+      detection with an honest (unanimated) result dialog. Deliberately
+      deferred, same "cœur d'abord" scoping as `09`: special pieces
+      (tourbillon, bombe aux éclats, rayée — matches just clear, no
+      creation or effects yet), obstacles and delivery objectives from
+      `05-mecaniques-de-jeu.md` (every cell is a plain matchable element),
+      actually activating a selected boost, the 10-second hint glow, the
+      shuffle's own animation (it reshuffles instantly), the loading/
+      opening animation, and the real win/lose animations (star + score
+      reveal, the leftover-moves shooting-star bonus, the lost-level
+      animation — `12-popups-fin-de-niveau.md`). See `mobile/README.md`
+      for details. `12` onward not started yet.
