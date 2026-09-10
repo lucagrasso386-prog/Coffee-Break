@@ -797,6 +797,27 @@ and it's really there, a rim-shadow between overlapping leaflets baked
 into the render, so it was left alone rather than "fixed" into
 something the creator never drew.
 
+The creator's next reaction, though, was a fair "fait a l'arrache" ("a
+bit rushed") pointed specifically at the palmier's outline -- and
+looking closer, the silhouette really was jaggier/more staircase-y than
+the frangipanier's. Root cause: this file's alpha is derived from the
+source's own transition width, and the palmier's transition turned out
+to be extremely narrow -- one profile measured a jump from alpha 197
+to 7 across a single pixel. The smoothstep curve applied on top
+sharpens a transition rather than softening one, so a 1px-wide edge
+stayed a 1px-wide edge -- fine on the frangipanier's large, rounded,
+softly-lit petals where a hard pixel step is easy to miss, glaring on
+the palmier's long thin diagonal frond edges where it reads as a
+staircase. Fixed with a small Gaussian blur (sigma ~0.9px) on top of
+the existing alpha -- done as a premultiplied-alpha blur (blur
+color*alpha and alpha together, then divide back out) rather than
+blurring alpha alone, so a softened edge pixel inherits real nearby
+color instead of an undefined one from deep in the background. Applied
+to all three palmier periods; the frangipanier and the other earlier
+cutouts have the same narrow-transition trait underneath but read fine
+without it, so they were left as they are rather than reprocessed on
+spec.
+
 Every node and decor piece also casts a contact shadow now -- the
 creator asked directly how the scroll would actually read as "resting
 on a curved surface" rather than flat stickers pasted over it.
