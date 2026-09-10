@@ -772,16 +772,29 @@ more uniform saturation range.
 
 One more round on this same asset: the creator flagged a small pink
 mark specifically on the leftmost flower in all three cutouts. Turned
-out not to be a cutout defect at all -- a good amount of time went
-into treating it like the alpha-estimation bug above (checking core
+out not to be a cutout defect at all -- a good amount of time went into
+treating it like the alpha-estimation bug above (checking core
 coverage and edge thickness right at that flower) before the creator
-caught their own mistake and clarified it was a mark on their day
-source image itself, then sent a corrected day render. Re-cut all three variants once the
-creator sent a corrected render for each in turn (day, then golden
-hour, then night) -- all clean now. Worth remembering: a localized, oddly-
-shaped defect isolated to one small feature is at least as likely to be
-bad source content as a pipeline bug, especially once the same
-pipeline has already proven clean everywhere else in the same image.
+caught their own mistake and clarified it was a mark on their source
+images themselves. Re-cut all three variants once the creator sent a
+corrected render for each in turn (day, then golden hour, then night)
+-- all clean now. Worth remembering: a localized, oddly-shaped defect
+isolated to one small feature is at least as likely to be bad source
+content as a pipeline bug, especially once the same pipeline has
+already proven clean everywhere else in the same image.
+
+Second filler variant is a palm tree ("palmier"), day only for now,
+cut from the same magenta chroma-key family as the frangipanier. Held
+up fine against the fern-like fronds' many thin, narrow leaflets --
+each notch between leaflets could in principle starve the
+nearest-core-projection method of any real core pixels the way the
+plumeria's one small bud did, but here the fronds are wide enough
+relative to the transition band that didn't happen. One thing that
+looked like a defect on first pass, right at those same notches, was a
+dark maroon tint along several leaflet edges -- traced back to the
+original source (not the cutout) and it's really there, a rim-shadow
+between overlapping leaflets baked into the render, so it was left
+alone rather than "fixed" into something the creator never drew.
 
 Every node and decor piece also casts a contact shadow now -- the
 creator asked directly how the scroll would actually read as "resting

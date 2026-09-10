@@ -47,14 +47,20 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
 
   /// Filler decor. Unlike the level buttons (one asset set reused as-is
   /// for both periods), the creator sent a genuinely distinct render per
-  /// period for this piece -- same pose each time, but a different color
-  /// grade -- so day/golden-hour/night each get their own asset rather
-  /// than sharing one.
+  /// period for the frangipanier -- same pose each time, but a different
+  /// color grade -- so day/golden-hour/night each get their own asset
+  /// rather than sharing one. The palmier is day-only so far; it'll join
+  /// the golden/night pools too once those renders exist.
   static const List<DecorVariant> _fillerDay = [
     DecorVariant(
       assetName: 'assets/progression_map/frangipanier_day.png',
       category: DecorCategory.filler,
       baseScale: 1.2,
+    ),
+    DecorVariant(
+      assetName: 'assets/progression_map/palmier_day.png',
+      category: DecorCategory.filler,
+      baseScale: 1.3,
     ),
   ];
   static const List<DecorVariant> _fillerGolden = [
