@@ -712,13 +712,19 @@ wiring left; nothing else about the scatter or the scroll needs to
 change.
 
 First filler variant in is a plumeria tree ("frangipanier"), day/
-golden-hour only for now (`assets/progression_map/frangipanier_day.png`)
--- same day-reused-for-golden-hour, night-still-empty pattern as the
-level buttons, and for the same reason: a daytime-lit tree under a
-night sky would look wrong, and there's no night version of this asset
-yet. `_decorScatter` moved from a `static const` to a `late final` set
-in `initState` so its filler pool can be picked per `_period`, the same
-way `_cloudAssets` already was.
+golden-hour only for now. Unlike the level buttons, which reuse one
+asset set as-is for both periods, the creator sent a genuinely distinct
+golden-hour render for this piece -- same pose, visibly warmer-graded
+-- so `assets/progression_map/frangipanier_day.png` and
+`frangipanier_golden.png` are two separate cutouts, each pulled against
+its own source's background color (the golden version's magenta
+backdrop itself reads warmer, ~(242,42,148) vs. the day version's
+~(212,14,155), consistent with a color grade applied to the whole
+render rather than just the tree). Night still stays an empty pool --
+no night art exists yet, and a daytime/golden-lit tree under a night
+sky would look wrong. `_decorScatter` moved from a `static const` to a
+`late final` set in `initState` so its filler pool can be picked per
+`_period`, the same way `_cloudAssets` already was.
 
 This cutout's background (flat magenta, crisp edges) posed no real
 challenge on its own, but its subject did: a full tree canopy has
