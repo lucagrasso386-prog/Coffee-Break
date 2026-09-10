@@ -16,6 +16,7 @@ import '../widgets/cylinder_projection.dart';
 import '../widgets/decor_scatter.dart';
 import '../widgets/spring_button.dart';
 import '../widgets/twinkle_field.dart';
+import 'level_mission_screen.dart';
 
 /// 09-carte-progression.md: the level map. Most decor art (palm trees,
 /// hibiscus, plumeria, the "Coffee Bar" building, clouds) isn't in yet --
@@ -281,9 +282,17 @@ class _ProgressionMapScreenState extends State<ProgressionMapScreen>
   }
 
   void _openLevel(LevelMapNode node) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => ComingSoonScreen(
-        message: 'Le niveau ${node.number} arrive avec 11-ecran-de-jeu.md.',
+    // 10-fiche-mission-niveau.md: "apparaît en superposition devant la
+    // carte, carte visible en arrière-plan" -- a non-opaque route keeps
+    // this screen (and the map behind it) mounted and visible rather than
+    // being replaced, matching that overlay behavior.
+    Navigator.of(context).push(PageRouteBuilder(
+      opaque: false,
+      barrierColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (_, animation, __) => FadeTransition(
+        opacity: animation,
+        child: LevelMissionScreen(node: node),
       ),
     ));
   }

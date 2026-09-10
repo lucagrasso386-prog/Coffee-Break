@@ -875,3 +875,82 @@ reachable). Tapping a level, or any of the three HUD buttons without a
 screen yet (rewards, shop, and the heart/coin counters themselves), lands
 on the same `ComingSoonScreen` stub used elsewhere (now shared, pulled out
 of `home_screen.dart` into `lib/widgets/coming_soon_screen.dart`).
+
+## Mission sheet (`10-fiche-mission-niveau.md`)
+
+Tapping a level node on the progression map now opens the mission sheet
+(`lib/screens/level_mission_screen.dart`) instead of going straight to
+the old stub. Per the spec ("apparaît en superposition devant la carte,
+carte visible en arrière-plan") this is an overlay, not a screen that
+replaces the map: `_openLevel` in `progression_map_screen.dart` pushes
+it via a `PageRouteBuilder` with `opaque: false` rather than the usual
+`MaterialPageRoute`, so the map screen stays mounted underneath instead
+of being torn down. The overlay itself draws a `BackdropFilter` blur +
+dark scrim across the whole screen (blurring the map behind it) with
+the mission card centered on top; tapping outside the card pops the
+route back to the map, tapping the card itself doesn't (a second
+`GestureDetector` around the card swallows the tap before it reaches
+the scrim's dismiss handler).
+
+The card's own "verre dépoli mat façon velours, blanchâtre et
+légèrement transparent" look is just a semi-opaque white
+(`Colors.white.withOpacity(0.88)`) rounded container with no blur filter
+of its own -- it doesn't need one, since it's sitting on top of the
+screen-wide blur already; its own translucency is what lets a soft hint
+of the blurred map show through. The "Niveau N" title's sticker-style
+white outline is 8 offset white copies of the text stacked behind the
+brown fill copy (`_OutlinedTitle`) -- simpler and more reliable at this
+font size than a stroke-style `Paint`, which doesn't blend cleanly with
+a separate fill pass on small text.
+
+Two new models back the variable content:
+
+- `lib/models/level_mission.dart` -- `LevelMission`/`MissionTarget`/
+  `MissionType`. Only one mission type exists in the spec so far
+  ("Complète la commande" -- collect N of one or two target
+  `GameElement`s), modeled as an enum anyway so a second type can be
+  added later without reshaping the class. `LevelMissionGenerator.forLevel`
+  is deterministic (seeded by level number, not persisted) and reuses the
+  spec's own calibrated count -- 15 individual elements per target,
+  the exact number the spec gives for level 1 to guarantee "ne doit
+  jamais pouvoir être terminée en moins de 2 minutes" -- for every level,
+  rather than inventing a difficulty curve with no board-speed data to
+  justify one (that's `11-ecran-de-jeu.md` territory). Level 1
+  specifically reproduces the spec's own worked example exactly
+  (croissant × 15, single target) instead of leaving it to the same
+  per-level roll every other level gets. About 30% of levels get a
+  second target element, per "peut porter sur plusieurs éléments à la
+  fois" -- capped at 2 so the mission row still fits the card's fixed
+  width cleanly (the spec's own "chaque mission doit être conçue pour
+  bien s'adapter visuellement à la fiche").
+- `lib/models/boost_inventory.dart` -- a flat placeholder map, every
+  boost at 0. There's no backend inventory (`ProgressDTO` only carries
+  lives/coins/xp), no way to earn a boost (`14-boutique.md` isn't built),
+  and no way to spend one in a level (`11-ecran-de-jeu.md` isn't built
+  either) -- so rather than inventing plausible-looking starting
+  quantities, every boost honestly shows 0 and reads as dimmed and
+  inert on the sheet until that whole loop exists.
+
+Selecting a boost (per the spec: "en cliquant sur la zone affichant la
+quantité possédée d'un bonus, une animation d'enfoncement indique
+lequel est sélectionné") is a tap-to-toggle on the count pill
+specifically -- not the icon above it, matching the spec's own scoping
+of the tappable zone to where the quantity is shown. Toggling reuses
+`SpringButton` for the per-tap bounce every button in the game gets,
+layered under an `AnimatedContainer` that eases the pill itself into a
+flatter, lighter "pushed in" look while selected (no native inset
+shadow in Flutter, so a lighter fill + a dropped shadow read as
+"pressed" here) -- the transient spring bounce alone wouldn't carry a
+*persistent* selected state on its own. Selection is capped at
+`maxEquippedBoosts` (already defined in `boost_power.dart`, unused
+until now) and a boost at 0 owned can't be selected at all -- currently
+true for all five, so the whole row is inert until real inventory
+exists, which is the honest state of things right now. "JOUER" leads to
+the same `ComingSoonScreen` stub ("Le niveau N arrive avec
+11-ecran-de-jeu.md") the level button itself used to go straight to.
+
+Like every other screen in this app so far, this hasn't been run on an
+actual device or simulator from this environment -- the layering
+(`BackdropFilter` + two nested `GestureDetector`s for
+dismiss-vs-swallow), the outlined-title stacking trick, and the
+pressed-pill look are reasoned through, not visually confirmed.

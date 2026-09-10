@@ -98,4 +98,18 @@ model, XP/lives formulas — is unchanged, since none of it was iOS-specific).
       map itself*, the
       biome swap every 10 levels, and infinite level generation past the
       first 1000 preloaded are still explicitly deferred. See
-      `mobile/README.md` for details. `10` onward not started yet.
+      `mobile/README.md` for details.
+- [x] `10-fiche-mission-niveau.md` — the mission sheet shown when a level
+      node is tapped (`mobile/lib/screens/level_mission_screen.dart`),
+      pushed as a non-opaque overlay so the map stays visible (blurred,
+      dimmed) behind it rather than being replaced. Level number, mission
+      (1-2 target elements, only "collect N" exists per the spec so far,
+      level 1 reproduces the spec's own croissant×15 example exactly),
+      and the 5-boost row with tap-to-toggle selection are all built and
+      wired. Boost quantities are honestly 0 everywhere — there's no
+      backend inventory, no way to earn a boost (`14-boutique.md`) or
+      spend one (`11-ecran-de-jeu.md`) yet — so every boost currently
+      shows dimmed/unselectable rather than an invented number. "JOUER"
+      leads to the same `11-ecran-de-jeu.md` stub the level button itself
+      used to. See `mobile/README.md` for details. `11` onward not
+      started yet.
