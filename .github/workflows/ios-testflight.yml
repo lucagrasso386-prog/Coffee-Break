@@ -28,7 +28,19 @@ jobs:
           channel: stable
 
       - name: Generate the Flutter iOS platform project
-        run: flutter create --platforms=ios --org com.yourcompany --project-name coffee_break .
+        run: flutter create --platforms=ios --org lux --project-name coffee_break .
+
+      - name: Force the exact registered Bundle ID
+        # `flutter create` on an existing pubspec.yaml keeps its `name:`
+        # field ("coffee_break") for the generated project, and Flutter's
+        # own org+name-to-bundle-id conversion isn't guaranteed to land on
+        # the *exact* string registered in Apple Developer/App Store
+        # Connect (lux.coffeebreak) -- so this overwrites it directly
+        # rather than relying on that conversion. Also touches the unused
+        # RunnerTests target (harmless: it's never archived/uploaded here).
+        run: |
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = lux.coffeebreak;/g" \
+            ios/Runner.xcodeproj/project.pbxproj
 
       - name: Install Flutter packages
         run: flutter pub get

@@ -7,28 +7,25 @@ ship at launch (see the root `README.md` architecture note).
 
 ## 1. Apple Developer
 
-- [ ] In the existing Apple Developer account, register a **new Bundle ID**
-      for Coffee Break, distinct from the other app (e.g.
-      `com.yourcompany.coffeebreak` — replace `yourcompany` with your real
-      reverse-DNS prefix).
-  - Enable capabilities: **Sign In with Apple**, **In-App Purchase**.
+- [x] Registered the **Bundle ID** `lux.coffeebreak` in Apple Developer,
+      with **Sign In with Apple** and **In-App Purchase** capabilities
+      enabled. Already wired into the repo: `--org lux` in both iOS GitHub
+      workflows (`ios-testflight.yml` also force-sets the exact bundle
+      identifier after `flutter create`, rather than relying on Flutter's
+      org+project-name conversion to land on this exact string), and
+      `backend/.env.example` → `APPLE_BUNDLE_ID`.
 - [ ] Create a new **App Store Connect** app record using that Bundle ID.
       (App name comes from `02-identite-visuelle.md`.)
-- [ ] Update the Bundle ID in two places once created:
-  - `mobile/.github` workflows use `com.yourcompany` as the org passed to
-    `flutter create` (see step 3) — keep it consistent, or update both
-    workflow files if you pick a different reverse-DNS prefix
-  - `backend/.env` → `APPLE_BUNDLE_ID`
-- [ ] Find your **Team ID** (Apple Developer → Membership, a 10-character
-      code, different from the Bundle ID) — needed in step 3.
+- [x] **Team ID**: `9Q64FWDPM5` — already filled into
+      `mobile/ExportOptions.plist`.
 
 ## 2. Google Play Console
 
 - [ ] Create (or use the existing) **Google Play Console** developer
       account, and register a new app listing for Coffee Break.
-- [ ] Pick the **Application ID** (Android's equivalent of a Bundle ID, e.g.
-      `com.yourcompany.coffeebreak` — keep it matching the iOS Bundle ID for
-      consistency, though they're independent namespaces).
+- [ ] Pick the **Application ID** (Android's equivalent of a Bundle ID) —
+      `lux.coffeebreak`, matching the iOS Bundle ID, is the natural default
+      unless there's a reason to diverge (they're independent namespaces).
 - [ ] In [Google Cloud Console](https://console.cloud.google.com/) (same
       Google account/org as Play Console), create an **OAuth 2.0 Client ID**
       for Sign in with Google:
@@ -79,7 +76,7 @@ setting under your existing account, not a new external service):
 - [ ] **Keychain password**: any random string you make up, used only to
       protect the temporary keychain the workflow creates and deletes on
       each run. Store as `IOS_CI_KEYCHAIN_PASSWORD`.
-- [ ] Fill in your **Team ID** in `mobile/ExportOptions.plist` (see step 1).
+- [x] Team ID filled into `mobile/ExportOptions.plist` (see step 1).
 - [ ] In App Store Connect, add yourself as a tester (your Apple ID, the one
       your iPhone is signed into) to an **Internal Testing** group — no
       review needed for internal testers.

@@ -52,7 +52,7 @@ works directly, no cloud build needed.
 ```bash
 # one-time, on your machine: https://docs.flutter.dev/get-started/install
 cd mobile
-flutter create --org com.yourcompany --project-name coffee_break .
+flutter create --org lux --project-name coffee_break .
 flutter pub get
 flutter run
 ```
@@ -64,9 +64,11 @@ platform folders (`android/`, `ios/`, ...) without touching `lib/`,
 
 ## Before you build
 
-- Replace the placeholder Bundle ID (iOS) / Application ID (Android) —
-  `com.yourcompany.coffeebreak` — once real ones exist in Apple Developer and
-  Google Play Console. See `../docs/SETUP.md`.
+- iOS Bundle ID is registered as `lux.coffeebreak` (Apple Developer); the
+  Android Application ID still needs picking once Google Play Console setup
+  happens (step 2 in `../docs/SETUP.md`). The `--org lux` above matches the
+  iOS side already; keep it for Android too unless a different prefix is
+  picked there.
 - `lib/models/app_config.dart` points at a placeholder Railway URL. Update it
   once the backend is deployed.
 - Sign in with Apple and Sign in with Google both need platform-side setup
