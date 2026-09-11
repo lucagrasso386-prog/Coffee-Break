@@ -48,33 +48,30 @@ jobs:
         #
         # And separately again: the generated pbxproj pins
         # CODE_SIGN_IDENTITY to the legacy "iPhone Developer" value for
-        # every configuration (Flutter's default template), which is what
-        # made automatic signing resolve an *archive* to a Development
-        # profile (needing a registered test device) instead of the
-        # Distribution profile an App Store archive actually needs.
-        # Overwriting it in the pbxproj itself -- not via xcconfig, which
-        # only added a second, conflicting source -- removes that default
-        # rather than fighting it.
+        # every configuration (Flutter's default template). With
+        # CODE_SIGN_STYLE = Automatic, Xcode's new build system treats
+        # *any* explicit CODE_SIGN_IDENTITY -- "iPhone Developer" (the
+        # default) or "Apple Distribution" (an earlier attempt at this
+        # fix) alike -- as a manual override that conflicts with letting
+        # automatic signing resolve it itself, which is what actually
+        # produced "Runner is automatically signed for development, but a
+        # conflicting code signing identity ... has been manually
+        # specified" both times. Clearing it to an empty string (not
+        # deleting the line, and not setting a competing value) is the
+        # documented fix: it tells automatic signing there's nothing to
+        # override, so -allowProvisioningUpdates can resolve the right
+        # (Distribution, for an archive) identity via the ASC API key on
+        # its own.
         run: |
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = lux.coffeebreak;/g" \
             ios/Runner.xcodeproj/project.pbxproj
           sed -i '' -E \
-            -e 's/"CODE_SIGN_IDENTITY\[sdk=([a-z*]+)\]" = "[^"]*";/"CODE_SIGN_IDENTITY[sdk=\1]" = "Apple Distribution";/g' \
-            -e 's/([[:space:]])CODE_SIGN_IDENTITY = "[^"]*";/\1CODE_SIGN_IDENTITY = "Apple Distribution";/g' \
+            -e 's/"CODE_SIGN_IDENTITY\[sdk=([a-z*]+)\]" = "[^"]*";/"CODE_SIGN_IDENTITY[sdk=\1]" = "";/g' \
+            -e 's/([[:space:]])CODE_SIGN_IDENTITY = "[^"]*";/\1CODE_SIGN_IDENTITY = "";/g' \
             ios/Runner.xcodeproj/project.pbxproj
           for f in ios/Flutter/Debug.xcconfig ios/Flutter/Release.xcconfig ios/Flutter/Profile.xcconfig; do
             echo "DEVELOPMENT_TEAM = 9Q64FWDPM5" >> "$f"
           done
-
-      - name: Debug -- print the real signing-related settings
-        # Temporary: two attempts at fixing "conflicting provisioning
-        # settings" from the pbxproj side haven't worked, so print what's
-        # actually there instead of guessing a third time blind.
-        run: |
-          echo "--- project.pbxproj (CODE_SIGN/PROVISIONING/TEAM/ProvisioningStyle lines) ---"
-          grep -n "CODE_SIGN\|PROVISIONING\|DEVELOPMENT_TEAM\|ProvisioningStyle" ios/Runner.xcodeproj/project.pbxproj || true
-          echo "--- Release.xcconfig ---"
-          cat ios/Flutter/Release.xcconfig
 
       - name: Install Flutter packages
         run: flutter pub get
