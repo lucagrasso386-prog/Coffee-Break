@@ -819,14 +819,14 @@ class _StarsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (count) {
       case 1:
-        return const Center(child: Image.asset(_asset, width: _small + 4, height: _small + 4));
+        return Center(child: Image.asset(_asset, width: _small + 4, height: _small + 4));
       case 2:
         return Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
+          children: [
             Image.asset(_asset, width: _small, height: _small),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Image.asset(_asset, width: _small, height: _small),
           ],
         );
@@ -834,14 +834,14 @@ class _StarsRow extends StatelessWidget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: const [
+          children: [
             Image.asset(_asset, width: _small, height: _small),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Padding(
-              padding: EdgeInsets.only(bottom: _centerRaise),
+              padding: const EdgeInsets.only(bottom: _centerRaise),
               child: Image.asset(_asset, width: _big, height: _big),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Image.asset(_asset, width: _small, height: _small),
           ],
         );
