@@ -1,0 +1,65 @@
+// Coffee Break backend schema.
+// Covers 01-setup-projet-et-architecture.md (accounts, progression sync, IAP
+// receipt validation) and 04-systemes-progression-et-xp.md (lives, XP).
+// Expect this to grow further once 05-mecaniques-de-jeu.md is processed
+// (e.g. per-level star state).
+//
+// Account model supports two sign-in providers (Apple, Google) plus a
+// device-local fallback, since the client ships on iOS and Android at
+// launch (see mobile/README.md) rather than iOS-only.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  // Set once the player uses Sign in with Apple.
+  appleUserId String?  @unique
+  // Set once the player uses Sign in with Google (the Android-launch
+  // counterpart to appleUserId).
+  googleUserId String? @unique
+  // Set for installs that never connect an account (device-local save).
+  deviceId    String?  @unique
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  progress  Progress?
+  purchases Purchase[]
+}
+
+model Progress {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  unlockedLevel Int @default(1)
+  xp            Int @default(0)
+  coins         Int @default(0)
+
+  // 04-systemes-progression-et-xp.md: 10 max, +1/hour. livesUpdatedAt anchors
+  // the regen calculation (see src/lib/lives.ts) rather than storing a raw
+  // timestamp per life, so partial progress toward the next life isn't lost.
+  lives          Int      @default(10)
+  livesUpdatedAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Purchase {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId             String
+  transactionId         String   @unique
+  originalTransactionId String?
+  environment           String // "Sandbox" | "Production"
+  purchaseType          String // "consumable" | "subscription"
+  validatedAt           DateTime @default(now())
+}

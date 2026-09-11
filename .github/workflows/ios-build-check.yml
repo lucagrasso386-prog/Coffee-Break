@@ -1,0 +1,33 @@
+name: iOS build check
+
+# Unsigned compile check -- no secrets needed, catches build breaks early
+# and cheaply. Doesn't produce anything installable; ios-testflight.yml is
+# the one that actually signs and ships a build.
+on:
+  push:
+    paths:
+      - "mobile/**"
+      - ".github/workflows/ios-build-check.yml"
+  workflow_dispatch: {}
+
+jobs:
+  build-check:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Generate the Flutter iOS platform project
+        run: flutter create --platforms=ios --org lux --project-name coffee_break .
+
+      - name: Install Flutter packages
+        run: flutter pub get
+
+      - name: Compile for iOS (no signing)
+        run: flutter build ios --release --no-codesign
