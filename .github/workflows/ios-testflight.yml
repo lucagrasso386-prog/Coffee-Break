@@ -66,6 +66,16 @@ jobs:
             echo "DEVELOPMENT_TEAM = 9Q64FWDPM5" >> "$f"
           done
 
+      - name: Debug -- print the real signing-related settings
+        # Temporary: two attempts at fixing "conflicting provisioning
+        # settings" from the pbxproj side haven't worked, so print what's
+        # actually there instead of guessing a third time blind.
+        run: |
+          echo "--- project.pbxproj (CODE_SIGN/PROVISIONING/TEAM/ProvisioningStyle lines) ---"
+          grep -n "CODE_SIGN\|PROVISIONING\|DEVELOPMENT_TEAM\|ProvisioningStyle" ios/Runner.xcodeproj/project.pbxproj || true
+          echo "--- Release.xcconfig ---"
+          cat ios/Flutter/Release.xcconfig
+
       - name: Install Flutter packages
         run: flutter pub get
 
