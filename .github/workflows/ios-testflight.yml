@@ -30,7 +30,7 @@ jobs:
       - name: Generate the Flutter iOS platform project
         run: flutter create --platforms=ios --org lux --project-name coffee_break .
 
-      - name: Force the exact registered Bundle ID
+      - name: Force the exact registered Bundle ID and Development Team
         # `flutter create` on an existing pubspec.yaml keeps its `name:`
         # field ("coffee_break") for the generated project, and Flutter's
         # own org+name-to-bundle-id conversion isn't guaranteed to land on
@@ -38,9 +38,19 @@ jobs:
         # Connect (lux.coffeebreak) -- so this overwrites it directly
         # rather than relying on that conversion. Also touches the unused
         # RunnerTests target (harmless: it's never archived/uploaded here).
+        #
+        # Separately, `flutter build ios --no-codesign` still fails on
+        # current Xcode with "requires a selected Development Team" unless
+        # DEVELOPMENT_TEAM is set somewhere Xcode's new build system reads
+        # it -- appending it to the per-configuration xcconfig files (which
+        # Flutter always includes) is the standard fix, since automatic
+        # signing needs a team even for the codesign-skipped compile step.
         run: |
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = lux.coffeebreak;/g" \
             ios/Runner.xcodeproj/project.pbxproj
+          for f in ios/Flutter/Debug.xcconfig ios/Flutter/Release.xcconfig ios/Flutter/Profile.xcconfig; do
+            echo "DEVELOPMENT_TEAM = 9Q64FWDPM5" >> "$f"
+          done
 
       - name: Install Flutter packages
         run: flutter pub get
