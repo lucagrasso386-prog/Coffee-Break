@@ -7,15 +7,19 @@ ship at launch (see the root `README.md` architecture note).
 
 ## 1. Apple Developer
 
-- [x] Registered the **Bundle ID** `lux.coffeebreak` in Apple Developer,
-      with **Sign In with Apple** and **In-App Purchase** capabilities
-      enabled. Already wired into the repo: `--org lux` in both iOS GitHub
-      workflows (`ios-testflight.yml` also force-sets the exact bundle
-      identifier after `flutter create`, rather than relying on Flutter's
+- [x] Registered the **Bundle ID** `com.lucagiraud.coffeebreak` in Apple
+      Developer (uniformized with the creator's other apps; replaces the
+      earlier `lux.coffeebreak`), with **Sign In with Apple** and
+      **In-App Purchase** capabilities enabled. Already wired into the
+      repo: `--org com.lucagiraud` in both iOS GitHub workflows
+      (`ios-testflight.yml` also force-sets the exact bundle identifier
+      after `flutter create`, rather than relying on Flutter's
       org+project-name conversion to land on this exact string), and
       `backend/.env.example` → `APPLE_BUNDLE_ID`.
 - [ ] Create a new **App Store Connect** app record using that Bundle ID.
-      (App name comes from `02-identite-visuelle.md`.)
+      (App name comes from `02-identite-visuelle.md`.) The earlier record
+      created under `lux.coffeebreak` can't be reused for the new Bundle
+      ID.
 - [x] **Team ID**: `9Q64FWDPM5` — already filled into
       `mobile/ExportOptions.plist`.
 
@@ -24,8 +28,9 @@ ship at launch (see the root `README.md` architecture note).
 - [ ] Create (or use the existing) **Google Play Console** developer
       account, and register a new app listing for Coffee Break.
 - [ ] Pick the **Application ID** (Android's equivalent of a Bundle ID) —
-      `lux.coffeebreak`, matching the iOS Bundle ID, is the natural default
-      unless there's a reason to diverge (they're independent namespaces).
+      `com.lucagiraud.coffeebreak`, matching the iOS Bundle ID, is the
+      natural default unless there's a reason to diverge (they're
+      independent namespaces).
 - [ ] In [Google Cloud Console](https://console.cloud.google.com/) (same
       Google account/org as Play Console), create an **OAuth 2.0 Client ID**
       for Sign in with Google:

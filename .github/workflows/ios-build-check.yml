@@ -24,7 +24,7 @@ jobs:
           channel: stable
 
       - name: Generate the Flutter iOS platform project
-        run: flutter create --platforms=ios --org lux --project-name coffee_break .
+        run: flutter create --platforms=ios --org com.lucagiraud --project-name coffee_break .
 
       - name: Install Flutter packages
         run: flutter pub get
