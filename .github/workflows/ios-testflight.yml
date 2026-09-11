@@ -46,18 +46,24 @@ jobs:
         # Flutter always includes) is the standard fix, since automatic
         # signing needs a team even for the codesign-skipped compile step.
         #
-        # And separately again: without an explicit CODE_SIGN_IDENTITY,
-        # `xcodebuild archive` with automatic signing was requesting an
-        # *iOS App Development* profile (which needs a registered test
-        # device, hence "Your team has no devices...") instead of the
-        # Distribution profile an archive for App Store upload actually
-        # needs -- forcing "Apple Distribution" here is the fix.
+        # And separately again: the generated pbxproj pins
+        # CODE_SIGN_IDENTITY to the legacy "iPhone Developer" value for
+        # every configuration (Flutter's default template), which is what
+        # made automatic signing resolve an *archive* to a Development
+        # profile (needing a registered test device) instead of the
+        # Distribution profile an App Store archive actually needs.
+        # Overwriting it in the pbxproj itself -- not via xcconfig, which
+        # only added a second, conflicting source -- removes that default
+        # rather than fighting it.
         run: |
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = lux.coffeebreak;/g" \
             ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' -E \
+            -e 's/"CODE_SIGN_IDENTITY\[sdk=([a-z*]+)\]" = "[^"]*";/"CODE_SIGN_IDENTITY[sdk=\1]" = "Apple Distribution";/g' \
+            -e 's/([[:space:]])CODE_SIGN_IDENTITY = "[^"]*";/\1CODE_SIGN_IDENTITY = "Apple Distribution";/g' \
+            ios/Runner.xcodeproj/project.pbxproj
           for f in ios/Flutter/Debug.xcconfig ios/Flutter/Release.xcconfig ios/Flutter/Profile.xcconfig; do
             echo "DEVELOPMENT_TEAM = 9Q64FWDPM5" >> "$f"
-            echo "CODE_SIGN_IDENTITY = Apple Distribution" >> "$f"
           done
 
       - name: Install Flutter packages
